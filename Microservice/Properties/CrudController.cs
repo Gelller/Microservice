@@ -2,56 +2,134 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 
 
 namespace Microservice.Properties
 {
+
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class CrudController : ControllerBase
     {
-        private readonly ValuesHolder holder;
 
-        public CrudController(ValuesHolder holder)
-        {
-            this.holder = holder;
-        }
-
+        private SaveTemp SaveTemp;
         
-
-        [HttpPost("create")]
-        public IActionResult Create([FromQuery] string input)
+        private WeatherList WeatherList;
+       
+        public CrudController(WeatherList WeatherList, SaveTemp SaveTemp)
         {
-            holder.Values.Add(input);
-            return Ok();
+        
+            this.WeatherList = WeatherList;
+            this.SaveTemp = SaveTemp;
         }
 
-        [HttpGet("read")]
-        public IActionResult Read()
-        {
-            return Ok(holder.Values);
-        }
 
-        [HttpPut("update")]
-        public IActionResult Update([FromQuery] string stringsToUpdate, [FromQuery] string newValue)
+        //сохранить температуру в указанное время
+        [HttpPost("inputTemp")]
+        public IActionResult inputTemp([FromQuery] string inputDateTime)
         {
-            for (int i = 0; i < holder.Values.Count; i++)
+
+                
+            WeatherForecast bufWeather = null;
+            foreach (var item in WeatherList.Values)
             {
-                if (holder.Values[i] == stringsToUpdate)
-                    holder.Values[i] = newValue;
+                if (inputDateTime == item.Date)
+                {
+                    SaveTemp.temp = item.TemperatureC;
+                    bufWeather = item;
+                }
+
             }
 
-            return Ok();
+            return Ok("TemperatureC "+SaveTemp.temp+ "C");
         }
 
-        [HttpDelete("delete")]
-        public IActionResult Delete([FromQuery] string stringsToDelete)
+        //отредактировать показатель температуры в указанное время
+        [HttpPost("editTemp")]
+        public IActionResult editTemp([FromQuery] string inputDateTime,int inputTemp)
         {
-            holder.Values = holder.Values.Where(w => w != stringsToDelete).ToList();
-            return Ok();
+
+            foreach (var item in WeatherList.Values)
+            {
+                if (inputDateTime == item.Date)
+                    item.TemperatureC = inputTemp;
+
+            }
+
+            return Ok(WeatherList);
+        }
+
+        //удалить показатель температуры в указанный промежуток времени
+        [HttpPost("deleteTemp")]
+        public IActionResult deleteTemp([FromQuery] string input, string input2)
+        {
+          
+            List<WeatherForecast> delList = new List<WeatherForecast>();
+            
+           
+            DateTime datefrom = Convert.ToDateTime(input);
+            DateTime dateto = Convert.ToDateTime(input2);
+
+            foreach (var item in WeatherList.Values)
+            {
+                if (datefrom<= Convert.ToDateTime(item.Date)&& dateto >= Convert.ToDateTime(item.Date))
+                    delList.Add(item);
+
+
+            }
+
+            foreach (var item in delList)
+            {
+                WeatherList.Values.Remove(item);
+            }
+            return Ok(WeatherList);
+        }
+
+        //прочитать список показателей температуры за указанный промежуток времени
+        [HttpGet("readTemp")]
+        public IActionResult readTemp([FromQuery] string inputDatefrom, string inputDateTo)
+        {
+
+
+            List<WeatherForecast> ListOutput = new List<WeatherForecast>();
+
+            DateTime datefrom = Convert.ToDateTime(inputDatefrom);
+            DateTime dateto = Convert.ToDateTime(inputDateTo);
+
+            foreach (var item in WeatherList.Values)
+            {
+                if (datefrom <= Convert.ToDateTime(item.Date) && dateto >= Convert.ToDateTime(item.Date))
+                    ListOutput.Add(item);
+
+
+            }
+
+            return Ok(ListOutput);
+        }
+
+
+        //чтение списка
+        [HttpGet("read")]
+        public IActionResult Read()
+        {        
+            return Ok(WeatherList);
+        }
+
+        //создание списка температур
+        [HttpGet("create")]
+        public IActionResult Create()
+        {        
+             var RandomDate = new Controllers.WeatherForecastController();
+            for (int i = 0; i < 5; i++)
+            {
+                WeatherList.Values.Add(RandomDate.Get());
+                
+            }
+
+            return Ok(WeatherList);
         }
 
     }
