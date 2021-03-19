@@ -8,8 +8,6 @@ using System.Collections.Generic;
 namespace Microservice.Properties
 {
 
-
-
     [Route("api/[controller]")]
     [ApiController]
     public class CrudController : ControllerBase
@@ -26,12 +24,10 @@ namespace Microservice.Properties
             this.SaveTemp = SaveTemp;
         }
 
-
         //сохранить температуру в указанное время
         [HttpPost("inputTemp")]
         public IActionResult inputTemp([FromQuery] string inputDateTime)
         {
-
                 
             WeatherForecast bufWeather = null;
             foreach (var item in WeatherList.Values)
