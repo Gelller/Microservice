@@ -7,7 +7,6 @@ namespace Microservice
 {
     public class WeatherList
     {
-
         public List<WeatherForecast> Values { get; set; }
         public WeatherList()
         {

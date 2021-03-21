@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 
 
-
 namespace Microservice.Properties
 {
 
@@ -12,120 +11,82 @@ namespace Microservice.Properties
     [ApiController]
     public class CrudController : ControllerBase
     {
-
-        private SaveTemp SaveTemp;
-        
-        private WeatherList WeatherList;
-       
-        public CrudController(WeatherList WeatherList, SaveTemp SaveTemp)
-        {
-        
-            this.WeatherList = WeatherList;
-            this.SaveTemp = SaveTemp;
+        private WeatherList _weatherList;
+        public CrudController(WeatherList WeatherList)
+        {        
+            this._weatherList = WeatherList;
         }
-
         //сохранить температуру в указанное время
-        [HttpPost("inputTemp")]
-        public IActionResult inputTemp([FromQuery] string inputDateTime)
+        [HttpPost("InputTemperature")]
+        public IActionResult InputTemperature([FromQuery] DateTime inputDateTemperature)
         {
-                
+            int SaveTemp=0;
             WeatherForecast bufWeather = null;
-            foreach (var item in WeatherList.Values)
+            foreach (var item in _weatherList.Values)
             {
-                if (inputDateTime == item.Date)
+                if (inputDateTemperature.Date == item.Date.Date)
                 {
-                    SaveTemp.temp = item.TemperatureC;
+                    SaveTemp = item.TemperatureC;
                     bufWeather = item;
                 }
-
             }
-
-            return Ok("TemperatureC "+SaveTemp.temp+ "C");
+            return Ok("TemperatureC "+SaveTemp+ "C");
         }
-
         //отредактировать показатель температуры в указанное время
-        [HttpPost("editTemp")]
-        public IActionResult editTemp([FromQuery] string inputDateTime,int inputTemp)
+        [HttpPut("EditTemperature")]
+        public IActionResult EditTemperature([FromQuery] DateTime inputDateTemperature, [FromQuery] int inputTemperature)
         {
-
-            foreach (var item in WeatherList.Values)
+            foreach (var item in _weatherList.Values)
             {
-                if (inputDateTime == item.Date)
-                    item.TemperatureC = inputTemp;
-
+                if (inputDateTemperature == item.Date)
+                    item.TemperatureC = inputTemperature;
             }
-
-            return Ok(WeatherList);
+            return Ok(_weatherList);
         }
-
         //удалить показатель температуры в указанный промежуток времени
-        [HttpPost("deleteTemp")]
-        public IActionResult deleteTemp([FromQuery] string input, string input2)
+        [HttpDelete("DeleteTemperature")]
+        public IActionResult DeleteTemperature([FromQuery] DateTime DateFrom, [FromQuery] DateTime DateTo)
         {
-          
             List<WeatherForecast> delList = new List<WeatherForecast>();
-            
-           
-            DateTime datefrom = Convert.ToDateTime(input);
-            DateTime dateto = Convert.ToDateTime(input2);
-
-            foreach (var item in WeatherList.Values)
+            foreach (var item in _weatherList.Values)
             {
-                if (datefrom<= Convert.ToDateTime(item.Date)&& dateto >= Convert.ToDateTime(item.Date))
+                if (DateFrom <= item.Date.Date && DateTo >= item.Date.Date)
                     delList.Add(item);
-
-
             }
-
             foreach (var item in delList)
             {
-                WeatherList.Values.Remove(item);
+                _weatherList.Values.Remove(item);
             }
-            return Ok(WeatherList);
+            return Ok(_weatherList);
         }
-
         //прочитать список показателей температуры за указанный промежуток времени
-        [HttpGet("readTemp")]
-        public IActionResult readTemp([FromQuery] string inputDatefrom, string inputDateTo)
+        [HttpGet("ReadTemperature")]
+        public IActionResult ReadTemperature([FromQuery] DateTime inputDatefrom, [FromQuery] DateTime inputDateTo)
         {
-
-
             List<WeatherForecast> ListOutput = new List<WeatherForecast>();
-
-            DateTime datefrom = Convert.ToDateTime(inputDatefrom);
-            DateTime dateto = Convert.ToDateTime(inputDateTo);
-
-            foreach (var item in WeatherList.Values)
+            foreach (var item in _weatherList.Values)
             {
-                if (datefrom <= Convert.ToDateTime(item.Date) && dateto >= Convert.ToDateTime(item.Date))
+                if (inputDatefrom <= item.Date.Date && inputDateTo >= item.Date.Date)
                     ListOutput.Add(item);
-
-
             }
-
             return Ok(ListOutput);
         }
-
-
         //чтение списка
-        [HttpGet("read")]
+        [HttpGet("Read")]
         public IActionResult Read()
         {        
-            return Ok(WeatherList);
+            return Ok(_weatherList);
         }
-
         //создание списка температур
-        [HttpGet("create")]
+        [HttpPost("Create")]
         public IActionResult Create()
         {        
-             var RandomDate = new Controllers.WeatherForecastController();
+            var RandomDate = new Controllers.WeatherForecastController();
             for (int i = 0; i < 5; i++)
             {
-                WeatherList.Values.Add(RandomDate.Get());
-                
+                _weatherList.Values.Add(RandomDate.Get()); 
             }
-
-            return Ok(WeatherList);
+            return Ok(_weatherList);
         }
 
     }

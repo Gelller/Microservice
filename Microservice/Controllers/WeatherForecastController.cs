@@ -14,31 +14,20 @@ namespace Microservice.Controllers
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
-
-        //private readonly ILogger<WeatherForecastController> _logger;
-
-        //public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        //{
-        //    _logger = logger;
-        //}
-
         [HttpGet]
         public WeatherForecast Get()
         {
             var rng = new Random();
-
-          
             var WeatherForecast = new WeatherForecast();     
-            double index = rng.NextDouble();
 
             DateTime DateTime = DateTime.Now;
+            DateTime newDate = new DateTime(DateTime.Year, DateTime.Month, DateTime.Day);
 
-            WeatherForecast.Date = DateTime.AddDays(index).ToString("f");
+            WeatherForecast.Date = newDate.Date.AddDays(rng.Next(0, 100));
             WeatherForecast.TemperatureC = rng.Next(-20, 55);
             WeatherForecast.Summary = Summaries[rng.Next(Summaries.Length)];
            
             return WeatherForecast;
-        }
-        
+        }    
     }
 }

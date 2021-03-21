@@ -29,10 +29,7 @@ namespace Microservice
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<SaveTemp>();//сохранение температуры
             services.AddSingleton<WeatherList>();//сохранения листа температур
-            
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
