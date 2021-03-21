@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 
-namespace Microservice.Properties
+namespace Microservice.Controllers
 {
 
     [Route("api/[controller]")]
@@ -12,25 +12,19 @@ namespace Microservice.Properties
     public class CrudController : ControllerBase
     {
         private WeatherList _weatherList;
-        public CrudController(WeatherList WeatherList)
+        public CrudController(WeatherList weatherList)
         {        
-            this._weatherList = WeatherList;
+            this._weatherList = weatherList;
         }
         //сохранить температуру в указанное время
         [HttpPost("InputTemperature")]
-        public IActionResult InputTemperature([FromQuery] DateTime inputDateTemperature)
+        public IActionResult InputTemperature([FromQuery] DateTime inputDateTemperature, [FromQuery] int temperature)
         {
-            int SaveTemp=0;
-            WeatherForecast bufWeather = null;
-            foreach (var item in _weatherList.Values)
-            {
-                if (inputDateTemperature.Date == item.Date.Date)
-                {
-                    SaveTemp = item.TemperatureC;
-                    bufWeather = item;
-                }
-            }
-            return Ok("TemperatureC "+SaveTemp+ "C");
+            var newWeather = new WeatherForecast();       
+            newWeather.Date = inputDateTemperature;
+            newWeather.TemperatureC = temperature;
+            _weatherList.Values.Add(newWeather);
+            return Ok();
         }
         //отредактировать показатель температуры в указанное время
         [HttpPut("EditTemperature")]
@@ -41,53 +35,35 @@ namespace Microservice.Properties
                 if (inputDateTemperature == item.Date)
                     item.TemperatureC = inputTemperature;
             }
-            return Ok(_weatherList);
+            return Ok();
         }
         //удалить показатель температуры в указанный промежуток времени
         [HttpDelete("DeleteTemperature")]
-        public IActionResult DeleteTemperature([FromQuery] DateTime DateFrom, [FromQuery] DateTime DateTo)
+        public IActionResult DeleteTemperature([FromQuery] DateTime dateFrom, [FromQuery] DateTime dateTo)
         {
-            List<WeatherForecast> delList = new List<WeatherForecast>();
+            List<WeatherForecast> itemsToDelete = new List<WeatherForecast>();
             foreach (var item in _weatherList.Values)
             {
-                if (DateFrom <= item.Date.Date && DateTo >= item.Date.Date)
-                    delList.Add(item);
+                if (dateFrom <= item.Date.Date && dateTo >= item.Date.Date)
+                    itemsToDelete.Add(item);
             }
-            foreach (var item in delList)
+            foreach (var item in itemsToDelete)
             {
                 _weatherList.Values.Remove(item);
             }
-            return Ok(_weatherList);
+            return Ok();
         }
         //прочитать список показателей температуры за указанный промежуток времени
         [HttpGet("ReadTemperature")]
         public IActionResult ReadTemperature([FromQuery] DateTime inputDatefrom, [FromQuery] DateTime inputDateTo)
         {
-            List<WeatherForecast> ListOutput = new List<WeatherForecast>();
+            List<WeatherForecast> itemOutput = new List<WeatherForecast>();
             foreach (var item in _weatherList.Values)
             {
                 if (inputDatefrom <= item.Date.Date && inputDateTo >= item.Date.Date)
-                    ListOutput.Add(item);
+                    itemOutput.Add(item);
             }
-            return Ok(ListOutput);
+            return Ok(itemOutput);
         }
-        //чтение списка
-        [HttpGet("Read")]
-        public IActionResult Read()
-        {        
-            return Ok(_weatherList);
-        }
-        //создание списка температур
-        [HttpPost("Create")]
-        public IActionResult Create()
-        {        
-            var RandomDate = new Controllers.WeatherForecastController();
-            for (int i = 0; i < 5; i++)
-            {
-                _weatherList.Values.Add(RandomDate.Get()); 
-            }
-            return Ok(_weatherList);
-        }
-
     }
 }
