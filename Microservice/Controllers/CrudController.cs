@@ -6,7 +6,6 @@ using System.Collections.Generic;
 
 namespace Microservice.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
     public class CrudController : ControllerBase
