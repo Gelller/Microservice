@@ -1,9 +1,9 @@
-﻿using MetricsManager.Controllers;
+﻿using MetricsAgent.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
 
-namespace MetricsManagerTests
+namespace MetricsAgentTests
 {
     public class HddMetricsUnitTests
     {
@@ -16,7 +16,7 @@ namespace MetricsManagerTests
         public void GetMetricsFromAgent_ReturnsOk()
         {
             var agentId = 1;
-            var result = controller.GetMetricsFromAgent(agentId);
+            var result = controller.GetMetricsFromAgent();
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }

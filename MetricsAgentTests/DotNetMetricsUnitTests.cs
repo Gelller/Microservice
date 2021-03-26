@@ -1,17 +1,16 @@
-﻿using MetricsManager.Controllers;
+﻿using MetricsAgent.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
 
-namespace MetricsManagerTests
+namespace MetricsAgentTests
 {
-  
-    public class NetworkMetricsUnitTests
+    public class DotNetMetricsUnitTests
     {
-        private NetworkMetricsController controller;
-        public NetworkMetricsUnitTests()
+        private DotNetMetricsController controller;
+        public DotNetMetricsUnitTests()
         {
-            controller = new NetworkMetricsController();
+            controller = new DotNetMetricsController();
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
@@ -19,8 +18,9 @@ namespace MetricsManagerTests
             var agentId = 1;
             var fromTime = TimeSpan.FromSeconds(0);
             var toTime = TimeSpan.FromSeconds(100);
-            var result = controller.GetMetricsFromAgent(agentId, fromTime, toTime);
+            var result = controller.GetMetricsFromAgent(fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }
+
 }

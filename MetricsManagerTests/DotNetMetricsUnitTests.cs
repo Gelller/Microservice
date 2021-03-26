@@ -1,4 +1,4 @@
-﻿using Microservice.Controllers;
+﻿using MetricsManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
