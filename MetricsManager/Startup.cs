@@ -11,11 +11,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Microservice
+namespace MetricsManager
 {
     public class Startup
     {
-        
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -23,13 +22,10 @@ namespace Microservice
 
         public IConfiguration Configuration { get; }
 
-        
         // This method gets called by the runtime. Use this method to add services to the container.
-       
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            services.AddSingleton<WeatherList>();//сохранения листа температур
             services.AddSingleton<Controllers.NumberOfAgentsRegistered>();
         }
 
