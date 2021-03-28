@@ -7,10 +7,10 @@ namespace MetricsManagerTests
 {
     public class DotNetMetricsUnitTests
     {
-        private DotNetMetricsController controller;
+        private DotNetMetricsController _controller;
         public DotNetMetricsUnitTests()
         {
-            controller = new DotNetMetricsController();
+            _controller = new DotNetMetricsController();
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
@@ -18,9 +18,8 @@ namespace MetricsManagerTests
             var agentId = 1;
             var fromTime = TimeSpan.FromSeconds(0);
             var toTime = TimeSpan.FromSeconds(100);
-            var result = controller.GetMetricsFromAgent(agentId, fromTime, toTime);
+            var result = _controller.GetMetricsFromAgent(agentId, fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }
-
 }

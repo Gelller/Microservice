@@ -5,19 +5,18 @@ using Xunit;
 
 namespace MetricsAgentTests
 {
- 
     public class RamMetricsUnitTests
     {
-        private RamMetricsController controller;
+        private RamMetricsController _controller;
         public RamMetricsUnitTests()
         {
-            controller = new RamMetricsController();
+            _controller = new RamMetricsController();
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
             var agentId = 1;
-            var result = controller.GetMetricsFromAgent();
+            var result = _controller.GetMetricsFromAgent();
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }

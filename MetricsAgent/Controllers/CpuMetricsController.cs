@@ -30,5 +30,4 @@ namespace MetricsAgent.Controllers
         P95 = 3,
         P99 = 4
     }
-
 }

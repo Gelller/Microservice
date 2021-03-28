@@ -7,16 +7,16 @@ namespace MetricsManagerTests
 {
     public class HddMetricsUnitTests
     {
-        private HddMetricsController controller;
+        private HddMetricsController _controller;
         public HddMetricsUnitTests()
         {
-            controller = new HddMetricsController();
+            _controller = new HddMetricsController();
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
             var agentId = 1;
-            var result = controller.GetMetricsFromAgent(agentId);
+            var result = _controller.GetMetricsFromAgent(agentId);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }

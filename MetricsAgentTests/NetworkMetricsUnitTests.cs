@@ -4,21 +4,20 @@ using System;
 using Xunit;
 
 namespace MetricsAgentTests
-{
-  
+{ 
     public class NetworkMetricsUnitTests
     {
-        private NetworkMetricsController controller;
+        private NetworkMetricsController _controller;
         public NetworkMetricsUnitTests()
         {
-            controller = new NetworkMetricsController();
+            _controller = new NetworkMetricsController();
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
             var fromTime = TimeSpan.FromSeconds(0);
             var toTime = TimeSpan.FromSeconds(100);
-            var result = controller.GetMetricsFromAgent(fromTime, toTime);
+            var result = _controller.GetMetricsFromAgent(fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }
