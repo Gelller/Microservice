@@ -85,9 +85,9 @@ namespace MetricsAgent.DAL
                     returnList.Add(new CpuMetrics
                     {
                         Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(0),
+                        Value = reader.GetInt32(1),
                         // налету преобразуем прочитанные секунды в метку времени
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(0))
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
                     });
                 }
             }
@@ -108,8 +108,8 @@ namespace MetricsAgent.DAL
                     return new CpuMetrics
                     {
                         Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(0),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(0))
+                        Value = reader.GetInt32(1),
+                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
                     };
                 }
                 else

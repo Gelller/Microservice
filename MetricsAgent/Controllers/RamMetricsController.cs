@@ -7,6 +7,7 @@ using MetricsAgent.DAL;
 using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -14,14 +15,17 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class RamMetricsController : Controller
     {
+        private readonly ILogger<RamMetricsController> _logger;
         private IRamMetricsRepository _repository;
-        public RamMetricsController(IRamMetricsRepository repository)
+        public RamMetricsController(IRamMetricsRepository repository, ILogger<RamMetricsController> logger)
         {
+            _logger = logger;
             this._repository = repository;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricsCreateRequest request)
         {
+            _logger.LogInformation($"Метод Create {request}");
             _repository.Create(new RamMetrics
             {
                 Value = request.Value
@@ -33,8 +37,8 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
+            _logger.LogInformation($"Метод GetAll");
             var metrics = _repository.GetAll();
-
             var response = new AllRamMetricsResponse()
             {
                 Metrics = new List<RamMetricsDto>()
@@ -47,9 +51,10 @@ namespace MetricsAgent.Controllers
 
             return Ok(response);
         }
-        [HttpGet()]
+        [HttpGet("available")]
         public IActionResult GetMetricsFromAgent()
-        {   
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent");
             return Ok();
         }
     }

@@ -5,17 +5,20 @@ using Moq;
 using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 { 
     public class NetworkMetricsUnitTests
     {
+        private Mock<ILogger<NetworkMetricsController>> _logger;
         private NetworkMetricsController _controller;
         private Mock<INetworkMetricsRepository> _mock;
         public NetworkMetricsUnitTests()
         {
+            _logger = new Mock<ILogger<NetworkMetricsController>>();
             _mock = new Mock<INetworkMetricsRepository>();
-            _controller = new NetworkMetricsController(_mock.Object);
+            _controller = new NetworkMetricsController(_mock.Object,_logger.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()

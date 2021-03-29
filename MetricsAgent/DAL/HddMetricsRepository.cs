@@ -80,7 +80,7 @@ namespace MetricsAgent.DAL
                     returnList.Add(new HddMetrics
                     {
                         Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(0)
+                        Value = reader.GetInt32(1)
                     });
                 }
             }
@@ -101,7 +101,7 @@ namespace MetricsAgent.DAL
                     return new HddMetrics
                     {
                         Id = reader.GetInt32(0),
-                        Value = reader.GetInt32(0)
+                        Value = reader.GetInt32(1)
                     };
                 }
                 else

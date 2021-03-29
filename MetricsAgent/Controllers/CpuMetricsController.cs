@@ -7,6 +7,7 @@ using MetricsAgent.DAL;
 using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.Controllers
 {
@@ -14,14 +15,17 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
+        private readonly ILogger<CpuMetricsController> _logger;
         private ICpuMetricsRepository _repository;
-        public CpuMetricsController(ICpuMetricsRepository repository)
+        public CpuMetricsController(ICpuMetricsRepository repository, ILogger<CpuMetricsController> logger)
         {
+            _logger = logger;
             this._repository = repository;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricsCreateRequest request)
         {
+            _logger.LogInformation($"Метод Create {request}");
             _repository.Create(new CpuMetrics
             {
                 Time = request.Time,
@@ -34,8 +38,8 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
+            _logger.LogInformation($"Метод GetAll");
             var metrics = _repository.GetAll();
-
             var response = new AllCpuMetricsResponse()
             {
                 Metrics = new List<CpuMetricsDto>()
@@ -51,18 +55,14 @@ namespace MetricsAgent.Controllers
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime} toTime {toTime}");
             return Ok();
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
         {
-            return Ok();
-        }
-
-        [HttpGet("99")]
-        public IActionResult GetMetricsFromAgent()
-        {
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
             return Ok();
         }
     }

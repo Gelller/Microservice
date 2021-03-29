@@ -5,17 +5,20 @@ using Moq;
 using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
     public class RamMetricsUnitTests
     {
+        private Mock<ILogger<RamMetricsController>> _logger;
         private RamMetricsController _controller;
         private Mock<IRamMetricsRepository> _mock;
         public RamMetricsUnitTests()
         {
+            _logger = new Mock<ILogger<RamMetricsController>>();
             _mock = new Mock<IRamMetricsRepository>();
-            _controller = new RamMetricsController(_mock.Object);
+            _controller = new RamMetricsController(_mock.Object,_logger.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
