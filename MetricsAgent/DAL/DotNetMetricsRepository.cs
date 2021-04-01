@@ -13,37 +13,36 @@ namespace MetricsAgent.DAL
     public class DotNetMetricsRepository : IDotNetMetricsRepository
     {
         // наше соединение с базой данных
-        private SQLiteConnection connection;
+        private SQLiteConnection _connection;
 
         // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public DotNetMetricsRepository(SQLiteConnection connection)
         {
-            this.connection = connection;
-        }
+            _connection = connection;
+        }    
+            public void Create(DotNetMetrics item)
+            {
+                // создаем команду
+                using var cmd = new SQLiteCommand(_connection);
+                // прописываем в команду SQL запрос на вставку данных
+                cmd.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(@value, @time)";
 
-        public void Create(DotNetMetrics item)
-        {
-            // создаем команду
-            using var cmd = new SQLiteCommand(connection);
-            // прописываем в команду SQL запрос на вставку данных
-            cmd.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(@value, @time)";
+                // добавляем параметры в запрос из нашего объекта
+                cmd.Parameters.AddWithValue("@value", item.Value);
 
-            // добавляем параметры в запрос из нашего объекта
-            cmd.Parameters.AddWithValue("@value", item.Value);
+                // в таблице будем хранить время в секундах, потому преобразуем перед записью в секунды
+                // через свойство
+                cmd.Parameters.AddWithValue("@time", item.Time.ToUnixTimeSeconds());
+                // подготовка команды к выполнению
+                cmd.Prepare();
 
-            // в таблице будем хранить время в секундах, потому преобразуем перед записью в секунды
-            // через свойство
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
-            // подготовка команды к выполнению
-            cmd.Prepare();
-
-            // выполнение команды
-            cmd.ExecuteNonQuery();
-        }
+                // выполнение команды
+                cmd.ExecuteNonQuery();
+            }
 
         public void Delete(int id)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             // прописываем в команду SQL запрос на удаление данных
             cmd.CommandText = "DELETE FROM cpumetrics WHERE id=@id";
 
@@ -54,12 +53,12 @@ namespace MetricsAgent.DAL
 
         public void Update(DotNetMetrics item)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             // прописываем в команду SQL запрос на обновление данных
             cmd.CommandText = "UPDATE cpumetrics SET value = @value, time = @time WHERE id=@id;";
             cmd.Parameters.AddWithValue("@id", item.Id);
             cmd.Parameters.AddWithValue("@value", item.Value);
-            cmd.Parameters.AddWithValue("@time", item.Time.TotalSeconds);
+            cmd.Parameters.AddWithValue("@time", item.Time.ToUnixTimeSeconds());
             cmd.Prepare();
 
             cmd.ExecuteNonQuery();
@@ -67,7 +66,7 @@ namespace MetricsAgent.DAL
 
         public IList<DotNetMetrics> GetAll()
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
 
             // прописываем в команду SQL запрос на получение всех данных из таблицы
             cmd.CommandText = "SELECT * FROM cpumetrics";
@@ -85,17 +84,43 @@ namespace MetricsAgent.DAL
                         Id = reader.GetInt32(0),
                         Value = reader.GetInt32(1),
                         // налету преобразуем прочитанные секунды в метку времени
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                        Time = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt32(2))
                     });
                 }
             }
 
             return returnList;
         }
+        public IList<DotNetMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
+        {
+            using var cmd = new SQLiteCommand(_connection);
+            // прописываем в команду SQL запрос на получение всех данных из таблицы
+            cmd.CommandText = "SELECT * FROM cpumetrics";
+            var returnList = new List<DotNetMetrics>();
+            using (SQLiteDataReader reader = cmd.ExecuteReader())
+            {
+                // пока есть что читать -- читаем
+                while (reader.Read())
+                {
+                    if (reader.GetInt32(2) >= fromTime.ToUnixTimeSeconds() && reader.GetInt32(2) <= toTime.ToUnixTimeSeconds())
+                    {
+                        // добавляем объект в список возврата
+                        returnList.Add(new DotNetMetrics
+                        {
+                            Id = reader.GetInt32(0),
+                            Value = reader.GetInt32(1),
+                            // налету преобразуем прочитанные секунды в метку времени                     
+                            Time = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt32(2))
+                        });
+                    }
+                }
+            }
 
+            return returnList;
+        }
         public DotNetMetrics GetById(int id)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             cmd.CommandText = "SELECT * FROM cpumetrics WHERE id=@id";
             using (SQLiteDataReader reader = cmd.ExecuteReader())
             {
@@ -107,7 +132,7 @@ namespace MetricsAgent.DAL
                     {
                         Id = reader.GetInt32(0),
                         Value = reader.GetInt32(1),
-                        Time = TimeSpan.FromSeconds(reader.GetInt32(2))
+                        Time = DateTimeOffset.FromUnixTimeSeconds(reader.GetInt32(2))
                     };
                 }
                 else

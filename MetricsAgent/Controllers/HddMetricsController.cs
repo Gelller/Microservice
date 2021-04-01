@@ -21,7 +21,7 @@ namespace MetricsAgent.Controllers
         public HddMetricsController(IHddMetricsRepository repository, ILogger<HddMetricsController> logger)
         {
             _logger = logger;
-            this._repository = repository;
+            _repository = repository;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] HddMetricsCreateRequest request)

@@ -20,7 +20,7 @@ namespace MetricsAgent.Controllers
         public RamMetricsController(IRamMetricsRepository repository, ILogger<RamMetricsController> logger)
         {
             _logger = logger;
-            this._repository = repository;
+            _repository = repository;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricsCreateRequest request)

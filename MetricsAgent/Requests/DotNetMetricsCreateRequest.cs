@@ -7,7 +7,7 @@ namespace MetricsAgent.Requests
 {
     public class DotNetMetricsCreateRequest
     {
-        public TimeSpan Time { get; set; }
+        public DateTimeOffset Time { get; set; }
         public int Value { get; set; }
     }
 }

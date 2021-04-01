@@ -15,18 +15,21 @@ namespace MetricsAgent.DAL
     public class RamMetricsRepository : IRamMetricsRepository
     {
         // наше соединение с базой данных
-        private SQLiteConnection connection;
+        private SQLiteConnection _connection;
 
         // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public RamMetricsRepository(SQLiteConnection connection)
         {
-            this.connection = connection;
+            _connection = connection;
         }
-
+        public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
+        {
+            return null;
+        }
         public void Create(RamMetrics item)
         {
             // создаем команду
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             // прописываем в команду SQL запрос на вставку данных
             cmd.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(@value, @time)";
 
@@ -41,7 +44,7 @@ namespace MetricsAgent.DAL
 
         public void Delete(int id)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             // прописываем в команду SQL запрос на удаление данных
             cmd.CommandText = "DELETE FROM cpumetrics WHERE id=@id";
 
@@ -52,25 +55,22 @@ namespace MetricsAgent.DAL
 
         public void Update(RamMetrics item)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             // прописываем в команду SQL запрос на обновление данных
             cmd.CommandText = "UPDATE cpumetrics SET value = @value, time = @time WHERE id=@id;";
             cmd.Parameters.AddWithValue("@id", item.Id);
             cmd.Parameters.AddWithValue("@value", item.Value);
             cmd.Prepare();
-
             cmd.ExecuteNonQuery();
         }
 
         public IList<RamMetrics> GetAll()
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
 
             // прописываем в команду SQL запрос на получение всех данных из таблицы
             cmd.CommandText = "SELECT * FROM cpumetrics";
-
             var returnList = new List<RamMetrics>();
-
             using (SQLiteDataReader reader = cmd.ExecuteReader())
             {
                 // пока есть что читать -- читаем
@@ -87,10 +87,9 @@ namespace MetricsAgent.DAL
 
             return returnList;
         }
-
         public RamMetrics GetById(int id)
         {
-            using var cmd = new SQLiteCommand(connection);
+            using var cmd = new SQLiteCommand(_connection);
             cmd.CommandText = "SELECT * FROM cpumetrics WHERE id=@id";
             using (SQLiteDataReader reader = cmd.ExecuteReader())
             {
