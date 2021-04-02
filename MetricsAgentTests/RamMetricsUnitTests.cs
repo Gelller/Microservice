@@ -1,16 +1,38 @@
 ﻿using MetricsAgent.Controllers;
-using Microsoft.AspNetCore.Mvc;
+using MetricsAgent.DAL;
+using MetricsAgent.Models;
+using Moq;
 using System;
 using Xunit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgentTests
 {
     public class RamMetricsUnitTests
     {
+        private Mock<ILogger<RamMetricsController>> _logger;
         private RamMetricsController _controller;
+        private Mock<IRamMetricsRepository> _mock;
         public RamMetricsUnitTests()
         {
-            _controller = new RamMetricsController();
+            _logger = new Mock<ILogger<RamMetricsController>>();
+            _mock = new Mock<IRamMetricsRepository>();
+            _controller = new RamMetricsController(_mock.Object,_logger.Object);
+        }
+        [Fact]
+        public void Create_ShouldCall_Create_From_Repository()
+        {
+            // устанавливаем параметр заглушки
+            // в заглушке прописываем что в репозиторий прилетит CpuMetric объект
+            _mock.Setup(repository => repository.Create(It.IsAny<RamMetrics>())).Verifiable();
+            // logger.Setup(logger => logger);
+            // выполняем действие на контроллере
+            var result = _controller.Create(new MetricsAgent.Requests.RamMetricsCreateRequest { Value = 50 });
+
+            // проверяем заглушку на то, что пока работал контроллер
+            // действительно вызвался метод Create репозитория с нужным типом объекта в параметре
+            _mock.Verify(repository => repository.Create(It.IsAny<RamMetrics>()));
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()

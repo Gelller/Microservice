@@ -2,15 +2,19 @@
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace MetricsManagerTests
 {
     public class DotNetMetricsUnitTests
     {
         private DotNetMetricsController _controller;
+        private Mock<ILogger<DotNetMetricsController>> _logger;
         public DotNetMetricsUnitTests()
         {
-            _controller = new DotNetMetricsController();
+            _logger = new Mock<ILogger<DotNetMetricsController>>();
+            _controller = new DotNetMetricsController(_logger.Object);
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
