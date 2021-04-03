@@ -6,7 +6,8 @@ using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 namespace MetricsAgentTests
 { 
     public class NetworkMetricsUnitTests
@@ -14,11 +15,13 @@ namespace MetricsAgentTests
         private Mock<ILogger<NetworkMetricsController>> _logger;
         private NetworkMetricsController _controller;
         private Mock<INetworkMetricsRepository> _mock;
+        private Mock<IMapper> _imapper;
         public NetworkMetricsUnitTests()
         {
             _logger = new Mock<ILogger<NetworkMetricsController>>();
             _mock = new Mock<INetworkMetricsRepository>();
-            _controller = new NetworkMetricsController(_mock.Object,_logger.Object);
+            _imapper = new Mock<IMapper>();
+            _controller = new NetworkMetricsController(_mock.Object,_logger.Object, _imapper.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
@@ -33,6 +36,12 @@ namespace MetricsAgentTests
             // проверяем заглушку на то, что пока работал контроллер
             // действительно вызвался метод Create репозитория с нужным типом объекта в параметре
             _mock.Verify(repository => repository.Create(It.IsAny<NetworkMetrics>()), Times.AtMostOnce());
+        }
+        [Fact]
+        public void GetAll_ReturnsOk()
+        {
+            var result = _controller.GetAll();
+            _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()

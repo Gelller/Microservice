@@ -8,6 +8,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 
 namespace MetricsAgent.Controllers
@@ -18,10 +20,12 @@ namespace MetricsAgent.Controllers
     {
         private readonly ILogger<HddMetricsController> _logger;
         private IHddMetricsRepository _repository;
-        public HddMetricsController(IHddMetricsRepository repository, ILogger<HddMetricsController> logger)
+        private readonly IMapper _mapper;
+        public HddMetricsController(IHddMetricsRepository repository, ILogger<HddMetricsController> logger, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
+            _mapper = mapper;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] HddMetricsCreateRequest request)
@@ -38,17 +42,18 @@ namespace MetricsAgent.Controllers
         public IActionResult GetAll()
         {
             _logger.LogInformation($"Метод GetAll");
-            var metrics = _repository.GetAll();
+            IList<HddMetrics> metrics = _repository.GetAll();
             var response = new AllHddMetricsResponse()
             {
                 Metrics = new List<HddMetricsDto>()
             };
-
-            foreach (var metric in metrics)
+            if (metrics != null)
             {
-                response.Metrics.Add(new HddMetricsDto { Value = metric.Value, Id = metric.Id });
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<HddMetricsDto>(metric));
+                }
             }
-
             return Ok(response);
         }
         [HttpGet("left")]

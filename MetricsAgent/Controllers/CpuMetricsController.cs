@@ -8,6 +8,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -17,10 +19,12 @@ namespace MetricsAgent.Controllers
     {
         private readonly ILogger<CpuMetricsController> _logger;
         private ICpuMetricsRepository _repository;
-        public CpuMetricsController(ICpuMetricsRepository repository, ILogger<CpuMetricsController> logger)
+        private readonly IMapper _mapper;
+        public CpuMetricsController(ICpuMetricsRepository repository, ILogger<CpuMetricsController> logger, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
+            _mapper = mapper;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] CpuMetricsCreateRequest request)
@@ -38,37 +42,38 @@ namespace MetricsAgent.Controllers
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            _logger.LogInformation($"Метод GetAll");
-            var metrics = _repository.GetAll();
-            var response = new AllCpuMetricsResponse()
-            {
-                Metrics = new List<CpuMetricsDto>()
-            };
-
-            foreach (var metric in metrics)
-            {
-                response.Metrics.Add(new CpuMetricsDto { Time = metric.Time, Value = metric.Value, Id = metric.Id });
-            }
-
-            return Ok(response);
+                _logger.LogInformation($"Метод GetAll");
+                IList<CpuMetrics> metrics = _repository.GetAll();
+                var response = new AllCpuMetricsResponse()
+                {
+                    Metrics = new List<CpuMetricsDto>()
+                };
+                if (metrics != null)
+                {
+                    foreach (var metric in metrics)
+                    {
+                        response.Metrics.Add(_mapper.Map<CpuMetricsDto>(metric));
+                    }
+                }
+                return Ok(response);
         }
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
             var metrics = _repository.GetByTimeInterval(fromTime, toTime);
             var response = new AllCpuMetricsResponse()
             {
                 Metrics = new List<CpuMetricsDto>()
             };
-            if (metrics!= null)
+            if (metrics != null)
             {
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new CpuMetricsDto { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<CpuMetricsDto>(metric));
                 }
             }
-            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
-            return Ok(response);
+            return Ok(response);          
         }
 
         [HttpGet("from/{fromTime}/to/{toTime}/percentiles/{percentile}")]

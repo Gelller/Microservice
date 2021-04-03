@@ -8,6 +8,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -17,10 +19,12 @@ namespace MetricsAgent.Controllers
     {
         private readonly ILogger<RamMetricsController> _logger;
         private IRamMetricsRepository _repository;
-        public RamMetricsController(IRamMetricsRepository repository, ILogger<RamMetricsController> logger)
+        private readonly IMapper _mapper;
+        public RamMetricsController(IRamMetricsRepository repository, ILogger<RamMetricsController> logger, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
+            _mapper = mapper;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] RamMetricsCreateRequest request)
@@ -38,17 +42,18 @@ namespace MetricsAgent.Controllers
         public IActionResult GetAll()
         {
             _logger.LogInformation($"Метод GetAll");
-            var metrics = _repository.GetAll();
+            IList<RamMetrics> metrics = _repository.GetAll();
             var response = new AllRamMetricsResponse()
             {
                 Metrics = new List<RamMetricsDto>()
             };
-
-            foreach (var metric in metrics)
+            if (metrics != null)
             {
-                response.Metrics.Add(new RamMetricsDto { Value = metric.Value, Id = metric.Id });
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<RamMetricsDto>(metric));
+                }
             }
-
             return Ok(response);
         }
         [HttpGet("available")]

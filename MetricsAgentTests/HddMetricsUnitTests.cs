@@ -6,6 +6,8 @@ using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 
 namespace MetricsAgentTests
@@ -15,11 +17,13 @@ namespace MetricsAgentTests
         private Mock<ILogger<HddMetricsController>> _logger;
         private HddMetricsController _controller;
         private Mock<IHddMetricsRepository> _mock;
+        private Mock<IMapper> _imapper;
         public HddMetricsUnitTests()
         {
             _logger = new Mock<ILogger<HddMetricsController>>();
-            _mock = new Mock<IHddMetricsRepository>();   
-            _controller = new HddMetricsController(_mock.Object,_logger.Object);
+            _mock = new Mock<IHddMetricsRepository>();
+            _imapper = new Mock<IMapper>();
+            _controller = new HddMetricsController(_mock.Object,_logger.Object, _imapper.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
@@ -36,10 +40,10 @@ namespace MetricsAgentTests
             _mock.Verify(repository => repository.Create(It.IsAny<HddMetrics>()));
         }
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void GetAll_ReturnsOk()
         {
-            var result = _controller.GetMetricsFromAgent();
+            var result = _controller.GetAll();
             _ = Assert.IsAssignableFrom<IActionResult>(result);
-        }
+        }     
     }
 }
