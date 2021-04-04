@@ -15,5 +15,4 @@ namespace MetricsAgent.DAL.Repository
         public override void SetValue(IDbDataParameter parameter, DateTimeOffset value)
             => parameter.Value = value;
     }
-
 }

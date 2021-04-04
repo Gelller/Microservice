@@ -34,7 +34,6 @@ namespace MetricsAgent.DAL.Repository
             _connection.Execute(@$"CREATE TABLE if not exists rammetrics(id INTEGER PRIMARY KEY, value INT)");
             _connection.Open();
         }
-
         public void Create(RamMetrics item)
         {
             CreateAndOpenDb();

@@ -10,7 +10,6 @@ using System.IO;
 
 namespace MetricsAgent.DAL.Repository
 {
-   
     public class DotNetMetricsRepository : IDotNetMetricsRepository
     {
         // наше соединение с базой данных

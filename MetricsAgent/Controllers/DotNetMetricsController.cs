@@ -58,7 +58,6 @@ namespace MetricsAgent.Controllers
             return Ok(response);
         }
 
-
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {

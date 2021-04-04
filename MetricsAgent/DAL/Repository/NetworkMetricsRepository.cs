@@ -34,7 +34,6 @@ namespace MetricsAgent.DAL.Repository
             _connection.Execute(@$"CREATE TABLE if not exists networkmetrics(id INTEGER PRIMARY KEY, value INT, time INT64)");
             _connection.Open();
         }
-
         public void Create(NetworkMetrics item)
         {
             CreateAndOpenDb();

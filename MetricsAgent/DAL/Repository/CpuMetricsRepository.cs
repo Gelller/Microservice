@@ -9,7 +9,6 @@ using System.IO;
 
 namespace MetricsAgent.DAL.Repository
 {
-
     public class CpuMetricsRepository : ICpuMetricsRepository
     {
         private SQLiteConnection _connection;
@@ -33,7 +32,6 @@ namespace MetricsAgent.DAL.Repository
             _connection.Execute(@$"CREATE TABLE if not exists cpumetrics(id INTEGER PRIMARY KEY, value INT, time INT64)");
             _connection.Open();
         }
-
         public void Create(CpuMetrics item)
         {
             CreateAndOpenDb();
@@ -51,9 +49,7 @@ namespace MetricsAgent.DAL.Repository
                          time = item.Time.ToUnixTimeSeconds()
                      });
             }
-        }
-
-       
+        } 
         public IList<CpuMetrics> GetAll()
         {
             CreateAndOpenDb();
