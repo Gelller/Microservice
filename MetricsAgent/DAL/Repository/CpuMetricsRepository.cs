@@ -11,7 +11,6 @@ namespace MetricsAgent.DAL.Repository
 {
     public class CpuMetricsRepository : ICpuMetricsRepository
     {
-     //   private SQLiteConnection _connection;
         // строка подключения
         private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
         // инжектируем соединение с базой данных в наш репозиторий через конструктор
@@ -20,21 +19,8 @@ namespace MetricsAgent.DAL.Repository
             // добавляем парсилку типа TimeSpan в качестве подсказки для SQLite
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
         }
-        //public void CreateAndOpenDb()
-        //{
-        //    var dbFilePath = "metrics.db";
-        //    if (!File.Exists(dbFilePath))
-        //    {
-        //        SQLiteConnection.CreateFile(dbFilePath);          
-        //    }          
-        //    _connection = new SQLiteConnection(string.Format(
-        //       "Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;", dbFilePath));
-        // //   _connection.Execute(@$"CREATE TABLE if not exists cpumetrics(id INTEGER PRIMARY KEY, value INT, time INT64)");
-        //    _connection.Open();
-        //}
         public void Create(CpuMetrics item)
         {
-         //   CreateAndOpenDb();
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 //  запрос на вставку данных с плейсхолдерами для параметров     
@@ -52,14 +38,9 @@ namespace MetricsAgent.DAL.Repository
         } 
         public IList<CpuMetrics> GetAll()
         {
-          //  CreateAndOpenDb();
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                // читаем при помощи Query и в шаблон подставляем тип данных
-                // объект которого Dapper сам и заполнит его поля
-                // в соответсвии с названиями колонок    
                 return connection.Query<CpuMetrics>("SELECT Id, Time, Value FROM cpumetrics").ToList();
-
             }
           
         }
