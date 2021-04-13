@@ -34,6 +34,7 @@ namespace MetricsAgent.DAL.Repository
                   // значение запишется из поля Value объекта item
                   value = item.Value,
                   // записываем в поле time количество секунд
+                  time = item.Time.ToUnixTimeSeconds()
               });
             }
         }
@@ -41,12 +42,15 @@ namespace MetricsAgent.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<RamMetrics>("SELECT Id, Value FROM rammetrics").ToList();
+                return connection.Query<RamMetrics>("SELECT Id, Time, Value FROM rammetrics").ToList();
             }
         }
         public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            throw new NotImplementedException();
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<RamMetrics>($"SELECT Id, Time, Value FROM rammetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
+            }
         }
     }
 }

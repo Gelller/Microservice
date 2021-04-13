@@ -24,7 +24,8 @@ namespace MetricsAgent.Jobs
         public Task Execute(IJobExecutionContext context)
         { 
             var hddUsageInPercents = Convert.ToInt32(_hddCounter.NextValue());
-            _repository.Create(new Models.HddMetrics {Value = hddUsageInPercents });
+            DateTimeOffset time = DateTimeOffset.UtcNow;
+            _repository.Create(new Models.HddMetrics { Time = time, Value = hddUsageInPercents });
             return Task.CompletedTask;
         }
     }

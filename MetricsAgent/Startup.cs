@@ -80,7 +80,7 @@ namespace MetricsAgent
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(RamMetricJob),
                 cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
-            services.AddHostedService<QuartzHostedService>();
+            services.AddHostedService<QuartzHostedService>();       
         }
 
         private void ConfigureSqlLiteConnection(IServiceCollection services)

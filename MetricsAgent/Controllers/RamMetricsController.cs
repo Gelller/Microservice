@@ -32,6 +32,7 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation($"Метод Create {request}");
             _repository.Create(new RamMetrics
             {
+                Time = request.Time,
                 Value = request.Value
             });
 
@@ -56,11 +57,22 @@ namespace MetricsAgent.Controllers
             }
             return Ok(response);
         }
-        [HttpGet("available")]
-        public IActionResult GetMetricsFromAgent()
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"Метод GetMetricsFromAgent");
-            return Ok();
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllRamMetricsResponse()
+            {
+                Metrics = new List<RamMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<RamMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
     }
 }

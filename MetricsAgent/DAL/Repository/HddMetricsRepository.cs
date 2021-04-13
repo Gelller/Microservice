@@ -25,7 +25,7 @@ namespace MetricsAgent.DAL.Repository
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 //  запрос на вставку данных с плейсхолдерами для параметров     
-                connection.Execute(@"INSERT INTO hddmetrics(value) VALUES(@value)",
+                connection.Execute(@"INSERT INTO hddmetrics(value, time)  VALUES(@value, @time)",
               // анонимный объект с параметрами запроса
               new
               {
@@ -33,6 +33,7 @@ namespace MetricsAgent.DAL.Repository
                   // значение запишется из поля Value объекта item
                   value = item.Value,
                   // записываем в поле time количество секунд
+                  time = item.Time.ToUnixTimeSeconds()
               });
             }
         }
@@ -40,12 +41,16 @@ namespace MetricsAgent.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<HddMetrics>("SELECT Id, Value FROM hddmetrics").ToList();
+                return connection.Query<HddMetrics>("SELECT Id, Time, Value FROM hddmetrics").ToList();
             }
         }
+        
         public IList<HddMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            throw new NotImplementedException();
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<HddMetrics>($"SELECT Id, Time, Value FROM hddmetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
+            }
         }
     }
 }

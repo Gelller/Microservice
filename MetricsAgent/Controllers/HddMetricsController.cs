@@ -33,7 +33,9 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation($"Метод Create {request}");
             _repository.Create(new HddMetrics
             {
+                Time = request.Time,
                 Value = request.Value
+
             });
 
             return Ok();
@@ -61,6 +63,24 @@ namespace MetricsAgent.Controllers
         {
             _logger.LogInformation($"Метод GetMetricsFromAgent agentId");
             return Ok();
+        }
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllHddMetricsResponse()
+            {
+                Metrics = new List<HddMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<HddMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
     }
 }
