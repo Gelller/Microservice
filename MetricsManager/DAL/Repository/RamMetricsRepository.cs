@@ -36,7 +36,7 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<RamMetrics>("SELECT Id, Value FROM rammetrics").ToList();
+                return connection.Query<RamMetrics>("SELECT Id, Value, AgentId FROM rammetrics").ToList();
             }
         }
         public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)

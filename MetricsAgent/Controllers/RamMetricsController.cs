@@ -38,14 +38,6 @@ namespace MetricsAgent.Controllers
 
             return Ok();
         }
-        [HttpGet("all2")]
-        public IActionResult Create1([FromBody] RamMetricsCreateRequest request)
-        {
-
-           
-            return Ok("fff");
-        }
-
         [HttpGet("all")]
         public IActionResult GetAll()
         {

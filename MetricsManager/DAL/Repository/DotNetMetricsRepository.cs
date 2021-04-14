@@ -36,7 +36,7 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<DotNetMetrics>("SELECT Id, Time, Value FROM dotnetmetrics").ToList();
+                return connection.Query<DotNetMetrics>("SELECT Id, Time, Value, AgentId FROM dotnetmetrics").ToList();
             }
 
         }     

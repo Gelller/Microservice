@@ -1,4 +1,4 @@
-using MetricsManager.Controllers;
+﻿using MetricsManager.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using Xunit;
@@ -10,7 +10,7 @@ using MetricsManager.Client;
 
 namespace MetricsManagerTests
 {
-    public class CpuMetricsControllerUnitTests
+    public class Class1
     {
         private Mock<IMetricsAgentClient> _metricsAgentClient;
         private CpuMetricsController _controller;
@@ -18,7 +18,7 @@ namespace MetricsManagerTests
         private Mock<IMapper> _imapper;
         private Mock<ILogger<CpuMetricsController>> _logger;
 
-        public CpuMetricsControllerUnitTests()
+        public Class1()
         {
             _mock = new Mock<ICpuMetricsRepository>();
             _imapper = new Mock<IMapper>();
@@ -35,16 +35,16 @@ namespace MetricsManagerTests
             var result = _controller.GetMetricsFromAgent(agentId, fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
-        [Fact]
-        public void GetMetricsByPercentileFromAgent_ReturnsOk()
-        {
-            var agentId = 1;
-            Percentile percentile;
-            percentile = Percentile.P75;
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
-            var result = _controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
-        }
-    }   
+        //[Fact]
+        //public void GetMetricsByPercentileFromAgent_ReturnsOk()
+        //{
+        //    var agentId = 1;
+        //    Percentile percentile;
+        //    percentile = Percentile.P75;
+        //    var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
+        //    var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
+        //    var result = _controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
+        //    _ = Assert.IsAssignableFrom<IActionResult>(result);
+        //}
+    }
 }

@@ -36,7 +36,7 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<NetworkMetrics>("SELECT Id, Time, Value FROM networkmetrics").ToList();
+                return connection.Query<NetworkMetrics>("SELECT Id, Time, Value, AgentId FROM networkmetrics").ToList();
             }
         }
         public IList<NetworkMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)

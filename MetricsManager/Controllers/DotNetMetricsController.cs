@@ -9,6 +9,7 @@ using AutoMapper;
 using MetricsManager.Requests;
 using MetricsManager.Models;
 using MetricsManager.DAL.Interfaces;
+using MetricsManager.Responses;
 
 namespace MetricsManager.Controllers
 {
@@ -26,6 +27,25 @@ namespace MetricsManager.Controllers
             _mapper = mapper;
             _metricsAgentClient = metricsAgentClient;
             _logger = logger;
+        }
+
+        [HttpGet("all")]
+        public IActionResult GetAll()
+        {
+            _logger.LogInformation($"Метод GetAll");
+            IList<DotNetMetrics> metrics = _repository.GetAll();
+            var response = new AllDotNetMetricsApiResponse()
+            {
+                Metrics = new List<DotNetMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<DotNetMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)

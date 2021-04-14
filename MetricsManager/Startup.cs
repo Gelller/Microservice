@@ -17,6 +17,11 @@ using MetricsManager.DAL.Interfaces;
 using MetricsManager.DAL.Repository;
 using FluentMigrator.Runner;
 using AutoMapper;
+using MetricsManager.Jobs;
+using Quartz;
+using Quartz.Spi;
+using Quartz.Impl;
+using MetricManager;
 
 namespace MetricsManager
 {
@@ -61,6 +66,37 @@ namespace MetricsManager
         .AddTransientHttpErrorPolicy(p =>
             p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000)));
 
+            services.AddSingleton<IJobFactory, SingletonJobFactory>();
+            services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
+            // добавляем нашу задачу
+
+            services.AddSingleton<CpuMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(CpuMetricJob),
+                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+
+            services.AddSingleton<HddMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(HddMetricJob),
+                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+
+            services.AddSingleton<DotNetMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(DotNetMetricJob),
+                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+            services.AddHostedService<QuartzHostedService>();
+
+            services.AddSingleton<NetworkMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(NetworkMetricJob),
+                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+            services.AddHostedService<QuartzHostedService>();
+
+            //services.AddSingleton<RamMetricJob>();
+            //services.AddSingleton(new JobSchedule(
+            //    jobType: typeof(RamMetricJob),
+            //    cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+            services.AddHostedService<QuartzHostedService>();
         }
 
         private void ConfigureSqlLiteConnection(IServiceCollection services)

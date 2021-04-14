@@ -36,7 +36,7 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<HddMetrics>("SELECT Id, Value, Time FROM hddmetrics").ToList();
+                return connection.Query<HddMetrics>("SELECT Id, Value, Time, AgentId FROM hddmetrics").ToList();
             }
         }
         public IList<HddMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)

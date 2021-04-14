@@ -41,13 +41,13 @@ namespace MetricsManager.Controllers
                 ToTime = toTime
             });
 
-            foreach(var item in metrics.Metrics)
-            _repository.Create(new CpuMetrics
-            {
-                AgentId=agentId,
-                Time = item.Time,
-                Value = item.Value
-            });;
+            foreach (var item in metrics.Metrics)
+                _repository.Create(new CpuMetrics
+                {
+                    AgentId = agentId,
+                    Time = item.Time,
+                    Value = item.Value
+                }); ;
             return Ok(metrics);
         }
 
