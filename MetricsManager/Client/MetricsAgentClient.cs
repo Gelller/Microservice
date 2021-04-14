@@ -42,7 +42,7 @@ namespace MetricsManager.Client
         public AllHddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); ;
+            var toParameter = request.ToTime.DateTime.ToString("O"); 
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
@@ -70,12 +70,13 @@ namespace MetricsManager.Client
         public AllRamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); ;
+            var toParameter = request.ToTime.DateTime.ToString("O"); 
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
             var uri = new Uri(uriAdress[0].AgentAddress);
-            var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/ram/from/{fromParameter}/to/{toParameter}");
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/cpu2/all");
+         //   var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/ram/from/{fromParameter}/to/{toParameter}");
             try
             {
                 HttpResponseMessage response = _httpClient.SendAsync(httpRequest).Result;
@@ -89,7 +90,7 @@ namespace MetricsManager.Client
             }
             catch (Exception ex)
             {
-                _loggerHddMetrics.LogError(ex.Message);
+                _loggerCpuMetrics.LogError(ex.Message);
                 return null;
             }
         }
@@ -97,7 +98,7 @@ namespace MetricsManager.Client
         public AllCpuMetricsApiResponse GetAllCpuMetrics(GetAllCpuMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); ;
+            var toParameter = request.ToTime.DateTime.ToString("O"); 
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
@@ -124,7 +125,7 @@ namespace MetricsManager.Client
         public AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetrisApiRequest request)
         {
             var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); ;
+            var toParameter = request.ToTime.DateTime.ToString("O"); 
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 

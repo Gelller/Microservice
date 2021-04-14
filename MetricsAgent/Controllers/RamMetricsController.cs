@@ -13,7 +13,7 @@ using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
-    [Route("api/metrics/ram")]
+   [Route("api/metrics/ram")]
     [ApiController]
     public class RamMetricsController : Controller
     {
@@ -38,6 +38,13 @@ namespace MetricsAgent.Controllers
 
             return Ok();
         }
+        [HttpGet("all2")]
+        public IActionResult Create1([FromBody] RamMetricsCreateRequest request)
+        {
+
+           
+            return Ok("fff");
+        }
 
         [HttpGet("all")]
         public IActionResult GetAll()
@@ -57,6 +64,7 @@ namespace MetricsAgent.Controllers
             }
             return Ok(response);
         }
+        [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
             _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");

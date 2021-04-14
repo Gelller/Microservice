@@ -26,7 +26,7 @@ namespace MetricsAgent.DAL.Repository
             using (var connection = new SQLiteConnection(ConnectionString))
             {
                 //  запрос на вставку данных с плейсхолдерами для параметров     
-                connection.Execute(@"INSERT INTO rammetrics(value) VALUES(@value)",
+                connection.Execute(@"INSERT INTO rammetrics(value, time) VALUES(@value, @time)",
               // анонимный объект с параметрами запроса
               new
               {

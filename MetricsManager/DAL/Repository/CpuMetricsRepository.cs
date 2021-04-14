@@ -23,24 +23,20 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                //  запрос на вставку данных с плейсхолдерами для параметров     
-                  connection.Execute(@"INSERT INTO cpumetrics(value, time) VALUES(@value, @time)",
-                // анонимный объект с параметрами запроса
-                new
-                {
-                         // value подставится на место "@value" в строке запроса
-                         // значение запишется из поля Value объекта item
-                         value = item.Value,
-                         // записываем в поле time количество секунд
-                         time = item.Time.ToUnixTimeSeconds()
-                     });
+                connection.Execute(@"INSERT INTO cpumetrics(value, time, agentid ) VALUES(@value, @time, @agentid )",
+              new
+              {
+                 agentid = item.AgentId,
+                 value = item.Value,
+                 time = item.Time.ToUnixTimeSeconds()
+              }) ;
             }
         } 
         public IList<CpuMetrics> GetAll()
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<CpuMetrics>("SELECT Id, Time, Value FROM cpumetrics").ToList();
+                return connection.Query<CpuMetrics>("SELECT Id, Time, Value, AgentId FROM cpumetrics").ToList();
             }
           
         }

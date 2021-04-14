@@ -7,6 +7,8 @@ using System.Data.SQLite;
 using MetricsManager.Client;
 using AutoMapper;
 using MetricsManager.Requests;
+using MetricsManager.Models;
+using MetricsManager.DAL.Interfaces;
 
 namespace MetricsManager.Controllers
 {
@@ -14,11 +16,13 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class DotNetMetricsController : Controller
     {
+        private IDotNetMetricsRepository _repository;
         private IMetricsAgentClient _metricsAgentClient;
         private readonly IMapper _mapper;
         private readonly ILogger<DotNetMetricsController> _logger;
-        public DotNetMetricsController(IMetricsAgentClient metricsAgentClient, IMapper mapper, ILogger<DotNetMetricsController> logger)
+        public DotNetMetricsController(IDotNetMetricsRepository repository, IMetricsAgentClient metricsAgentClient, IMapper mapper, ILogger<DotNetMetricsController> logger)
         {
+            _repository = repository;
             _mapper = mapper;
             _metricsAgentClient = metricsAgentClient;
             _logger = logger;
@@ -35,7 +39,36 @@ namespace MetricsManager.Controllers
                 FromTime = fromTime,
                 ToTime = toTime
             });
+            foreach (var item in metrics.Metrics)
+                _repository.Create(new DotNetMetrics
+                {
+                    AgentId = agentId,
+                    Time = item.Time,
+                    Value = item.Value
+                }); ;
             return Ok(metrics);
+        }
+        [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
+        public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
+           [FromRoute] Percentile percentile)
+        {
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
+            var metrics = _metricsAgentClient.GetAllDotNetMetrics(new GetAllDotNetMetrisApiRequest
+
+            {
+                ClientBaseAddress = agentId,
+                FromTime = fromTime,
+                ToTime = toTime
+            });
+            double[] masValue = new double[metrics.Metrics.Count];
+            for (int i = 0; i < masValue.Length; i++)
+            {
+                masValue[i] = metrics.Metrics[i].Value;
+            }
+
+            var percentileCalculationMethod = new PercentileCalculationMethod();
+            var percentileValue = percentileCalculationMethod.PercentileCalculation(masValue, (double)percentile / 100);
+            return Ok(percentileValue);
         }
 
     }

@@ -6,6 +6,7 @@ using MetricsAgent.DAL.Interfaces;
 using Dapper;
 using System.Linq;
 using System.IO;
+using MetricsAgent.Controllers;
 
 namespace MetricsAgent.DAL.Repository
 {
@@ -50,6 +51,7 @@ namespace MetricsAgent.DAL.Repository
             {
                 return connection.Query<CpuMetrics>($"SELECT Id, Time, Value FROM cpumetrics WHERE Time>{fromTime.ToUnixTimeSeconds()} AND Time<{toTime.ToUnixTimeSeconds()}").ToList();
             }      
-        }     
+        }
+       
     }
 }

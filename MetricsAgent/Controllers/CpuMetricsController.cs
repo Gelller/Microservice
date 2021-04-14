@@ -80,6 +80,8 @@ namespace MetricsAgent.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {  
             _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
+
+           
             return Ok();
         }
     }
