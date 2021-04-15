@@ -30,7 +30,7 @@ namespace MetricsManager.Controllers
         }
 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
             _logger.LogInformation($"starting new request to metrics agent");    
             var metrics = _metricsAgentClient.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
@@ -66,6 +66,10 @@ namespace MetricsManager.Controllers
                 FromTime = fromTime,
                 ToTime = toTime
             });
+            var response = new AllCpuMetricsApiResponse()
+            {
+                Metrics = new List<CpuMetricsDto>()
+            };
             if (metrics != null)
             {
                 double[] masValue = new double[metrics.Metrics.Count];
@@ -86,6 +90,24 @@ namespace MetricsManager.Controllers
         {
             _logger.LogInformation($"Метод GetAll");
             IList<CpuMetrics> metrics = _repository.GetAll();
+            var response = new AllCpuMetricsApiResponse()
+            {
+                Metrics = new List<CpuMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<CpuMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
+        }
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
             var response = new AllCpuMetricsApiResponse()
             {
                 Metrics = new List<CpuMetricsDto>()
