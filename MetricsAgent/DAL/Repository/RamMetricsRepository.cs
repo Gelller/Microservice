@@ -12,17 +12,13 @@ namespace MetricsAgent.DAL.Repository
 {
     public class RamMetricsRepository : IRamMetricsRepository
     {
-        // строка подключения
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
-        // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public RamMetricsRepository()
         {
-            // добавляем парсилку типа TimeSpan в качестве подсказки для SQLite
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
         }
         public void Create(RamMetrics item)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             { 
               connection.Execute(@"INSERT INTO rammetrics(value, time) VALUES(@value, @time)",
               new
@@ -34,18 +30,17 @@ namespace MetricsAgent.DAL.Repository
         }
         public IList<RamMetrics> GetAll()
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 return connection.Query<RamMetrics>("SELECT Id, Time, Value FROM rammetrics").ToList();
             }
         }
         public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 return connection.Query<RamMetrics>($"SELECT Id, Time, Value FROM rammetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
             }
-        }
-       
+        }     
     }
 }

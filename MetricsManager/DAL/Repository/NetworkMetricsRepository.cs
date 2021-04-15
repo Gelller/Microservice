@@ -11,17 +11,13 @@ namespace MetricsManager.DAL.Repository
 {
     public class NetworkMetricsRepository : INetworkMetricsRepository
     {
-        // строка подключения
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
-        // инжектируем соединение с базой данных в наш репозиторий через конструктор
         public NetworkMetricsRepository()
         {
-            // добавляем парсилку типа TimeSpan в качестве подсказки для SQLite
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
         }
         public void Create(NetworkMetrics item)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 connection.Execute(@"INSERT INTO networkmetrics(value, time, agentid ) VALUES(@value, @time, @agentid )",
               new
@@ -34,14 +30,14 @@ namespace MetricsManager.DAL.Repository
         }
         public IList<NetworkMetrics> GetAll()
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 return connection.Query<NetworkMetrics>("SELECT Id, Time, Value, AgentId FROM networkmetrics").ToList();
             }
         }
         public IList<NetworkMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 return connection.Query<NetworkMetrics>($"SELECT Id, Time, Value FROM networkmetrics WHERE Time>{fromTime.ToUnixTimeSeconds()} AND Time<{toTime.ToUnixTimeSeconds()}").ToList();
             }

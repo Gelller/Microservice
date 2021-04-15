@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace MetricsManager.Jobs
 {
-
     public class RamMetricJob : IJob
     {
         private readonly IServiceProvider _provider;

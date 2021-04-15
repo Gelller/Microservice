@@ -11,7 +11,6 @@ using System.Threading.Tasks;
 
 namespace MetricsManager.Jobs
 {
-
     public class CpuMetricJob : IJob
     {
         private readonly IServiceProvider _provider;

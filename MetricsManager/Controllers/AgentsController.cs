@@ -19,24 +19,14 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class AgentsController : ControllerBase
     {
-      //  private AgentInfo _repository;
-      //  private NumberOfAgentsRegistered _numberOfAgentsRegistered;
-       // private readonly IHttpClientFactory _clientFactory;
-      //  private MetricsAgentClient _metricsAgent;
-
         public AgentsController()
         {
 
-      //      SqlMapper.AddTypeHandler(new StringToUriConverter());
         }
-
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;Pooling=True;Max Pool Size=100;";
-
         [HttpPost("register")]
         public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
         {
-
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
                 connection.Execute(@"INSERT INTO agent(AgentAddress) VALUES(@AgentAddress)",
                 new
@@ -46,23 +36,11 @@ namespace MetricsManager.Controllers
             }
             return Ok();
         }
-        //[HttpPut("enable/{agentId}")]
-        //public IActionResult EnableAgentById([FromRoute] int agentId)
-        //{
-        //    return Ok();
-        //}
-        //[HttpPut("disable/{agentId}")]
-        //public IActionResult DisableAgentById([FromRoute] int agentId)
-        //{
-        //    return Ok();
-        //}
-
         [HttpGet("сatalogRegisterAgent")]
         public IList<AgentInfo> СatalogRegisterAgent()
         {
-            using (var connection = new SQLiteConnection(ConnectionString))
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
-          
                 return connection.Query<AgentInfo>("SELECT AgentId, AgentAddress FROM agent").ToList();
             }
         }

@@ -33,8 +33,6 @@ namespace MetricsManager
         }
 
         public IConfiguration Configuration { get; }
-        private const string ConnectionString = @"Data Source=metrics.db; Version=3;";
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -56,7 +54,7 @@ namespace MetricsManager
                     // добавляем поддержку SQLite 
                     .AddSQLite()
                     // устанавливаем строку подключения
-                    .WithGlobalConnectionString(ConnectionString)
+                    .WithGlobalConnectionString(SQLConnected.ConnectionString)
                     // подсказываем где искать классы с миграциями
                     .ScanIn(typeof(Startup).Assembly).For.Migrations()
                 ).AddLogging(lb => lb
@@ -84,13 +82,11 @@ namespace MetricsManager
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(DotNetMetricJob),
                 cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
-            services.AddHostedService<QuartzHostedService>();
 
             services.AddSingleton<NetworkMetricJob>();
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(NetworkMetricJob),
                 cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
-            services.AddHostedService<QuartzHostedService>();
 
             services.AddSingleton<RamMetricJob>();
             services.AddSingleton(new JobSchedule(

@@ -48,14 +48,15 @@ namespace MetricsAgent
         }
 
         private static IJobDetail CreateJobDetail(JobSchedule schedule)
-        {
+        {     
             var jobType = schedule.JobType;
             return JobBuilder
-                .Create(jobType)
+               .Create(jobType)
                 .WithIdentity(jobType.FullName)
                 .WithDescription(jobType.Name)
                 .Build();
         }
+       
 
         private static ITrigger CreateTrigger(JobSchedule schedule)
         {
@@ -64,7 +65,7 @@ namespace MetricsAgent
                 .WithIdentity($"{schedule.JobType.FullName}.trigger")
                 .WithCronSchedule(schedule.CronExpression)
                 .WithDescription(schedule.CronExpression)
-                .Build();
+               .Build();
         }
     }
 
