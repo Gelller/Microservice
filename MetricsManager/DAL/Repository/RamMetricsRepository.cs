@@ -36,12 +36,15 @@ namespace MetricsManager.DAL.Repository
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
-                return connection.Query<RamMetrics>("SELECT Id, Value, AgentId FROM rammetrics").ToList();
+                return connection.Query<RamMetrics>("SELECT Id, Time, Value, AgentId FROM rammetrics").ToList();
             }
         }
         public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
-            throw new NotImplementedException();
+            using (var connection = new SQLiteConnection(ConnectionString))
+            {
+                return connection.Query<RamMetrics>($"SELECT Id, Time, Value FROM rammetrics WHERE Time>{fromTime.ToUnixTimeSeconds()} AND Time<{toTime.ToUnixTimeSeconds()}").ToList();
+            }
         }
     }
 }

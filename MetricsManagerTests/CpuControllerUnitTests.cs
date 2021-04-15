@@ -29,20 +29,20 @@ namespace MetricsManagerTests
         [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
-            var agentId = 1;
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
+            int agentId = 1;
+            var fromTime = DateTimeOffset.Now.AddHours(-1);
+            var toTime = DateTimeOffset.Now;
             var result = _controller.GetMetricsFromAgent(agentId, fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
         [Fact]
         public void GetMetricsByPercentileFromAgent_ReturnsOk()
         {
-            var agentId = 1;
+            int agentId = 1;
             Percentile percentile;
             percentile = Percentile.P75;
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
+            var fromTime = DateTimeOffset.Now.AddHours(-1);
+            var toTime = DateTimeOffset.Now;
             var result = _controller.GetMetricsByPercentileFromAgent(agentId, fromTime, toTime, percentile);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }

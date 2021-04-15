@@ -46,5 +46,6 @@ namespace MetricsAgent.DAL.Repository
                 return connection.Query<RamMetrics>($"SELECT Id, Time, Value FROM rammetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
             }
         }
+       
     }
 }

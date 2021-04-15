@@ -56,13 +56,16 @@ namespace MetricsManager.Controllers
                 FromTime = fromTime,
                 ToTime = toTime
             });
-            foreach (var item in metrics.Metrics)
-                _repository.Create(new RamMetrics
-                {
-                    AgentId = agentId,
-                    Time = item.Time,
-                    Value = item.Value
-                }); ;
+            if (metrics != null)
+            {
+                foreach (var item in metrics.Metrics)
+                    _repository.Create(new RamMetrics
+                    {
+                        AgentId = agentId,
+                        Time = item.Time,
+                        Value = item.Value
+                    }); ;
+            }
             return Ok(metrics);
         }
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
@@ -76,15 +79,19 @@ namespace MetricsManager.Controllers
                 FromTime = fromTime,
                 ToTime = toTime
             });
-            double[] masValue = new double[metrics.Metrics.Count];
-            for (int i = 0; i < masValue.Length; i++)
+            if (metrics != null)
             {
-                masValue[i] = metrics.Metrics[i].Value;
-            }
+                double[] masValue = new double[metrics.Metrics.Count];
+                for (int i = 0; i < masValue.Length; i++)
+                {
+                    masValue[i] = metrics.Metrics[i].Value;
+                }
 
-            var percentileCalculationMethod = new PercentileCalculationMethod();
-            var percentileValue = percentileCalculationMethod.PercentileCalculation(masValue, (double)percentile / 100);
-            return Ok(percentileValue);
+                var percentileCalculationMethod = new PercentileCalculationMethod();
+                var percentileValue = percentileCalculationMethod.PercentileCalculation(masValue, (double)percentile / 100);
+                return Ok(percentileValue);
+            }
+            return Ok();
         }
     }
 }

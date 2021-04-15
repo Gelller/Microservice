@@ -42,7 +42,7 @@ namespace MetricsManager.Client
             _loggerHddMetrics = logger;
         }
 
-        public List<AgentInfo> GetUri(int number)
+        private List<AgentInfo> GetUri(int number)
         {
             using (var connection = new SQLiteConnection(ConnectionString))
             {
@@ -52,8 +52,8 @@ namespace MetricsManager.Client
 
         public AllHddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request)
         {
-            var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); 
+            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+            var toParameter = request.ToTime.UtcDateTime.ToString("O");
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
@@ -88,9 +88,8 @@ namespace MetricsManager.Client
 
         public AllRamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request)
         {
-            var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); 
-
+            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+            var toParameter = request.ToTime.UtcDateTime.ToString("O");
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
             var uri = new Uri(uriAdress[0].AgentAddress);
@@ -122,8 +121,8 @@ namespace MetricsManager.Client
 
         public AllCpuMetricsApiResponse GetAllCpuMetrics(GetAllCpuMetricsApiRequest request)
         {
-            var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); 
+            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+            var toParameter = request.ToTime.UtcDateTime.ToString("O"); 
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
@@ -158,8 +157,8 @@ namespace MetricsManager.Client
 
         public AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetrisApiRequest request)
         {
-            var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); 
+            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+            var toParameter = request.ToTime.UtcDateTime.ToString("O");
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 
@@ -193,8 +192,8 @@ namespace MetricsManager.Client
 
         public AllNetworkMetricsApiResponse GetAllNetworkMetrics(GetAllNetworkMetricsApiRequest request)
         {
-            var fromParameter = request.FromTime.DateTime.ToString("O");
-            var toParameter = request.ToTime.DateTime.ToString("O"); ;
+            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+            var toParameter = request.ToTime.UtcDateTime.ToString("O");
 
             List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
 

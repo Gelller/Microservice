@@ -27,14 +27,14 @@ namespace MetricsManager.Jobs
             var fromTimeFromtheTable = fromTimeTable.GetTimeRam("rammetrics");
             if (fromTimeFromtheTable == null)
             {
-                DateTimeOffset fromTime = DateTimeOffset.UtcNow.LocalDateTime.AddHours(-1);
-                DateTimeOffset toTime = DateTimeOffset.UtcNow.LocalDateTime;
+                DateTimeOffset fromTime = DateTimeOffset.UtcNow.AddHours(-1);
+                DateTimeOffset toTime = DateTimeOffset.UtcNow;
                 int agentId = 1;
                 _repository.GetAllRamMetrics(new Requests.GetAllRamMetricsApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTime });
             }
             else
             {
-                DateTimeOffset toTime = DateTimeOffset.UtcNow.LocalDateTime;
+                DateTimeOffset toTime = DateTimeOffset.UtcNow;
                 int agentId = 1;
                 _repository.GetAllRamMetrics(new Requests.GetAllRamMetricsApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTimeFromtheTable.Time });
             }

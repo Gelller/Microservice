@@ -92,10 +92,10 @@ namespace MetricsManager
                 cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
             services.AddHostedService<QuartzHostedService>();
 
-            //services.AddSingleton<RamMetricJob>();
-            //services.AddSingleton(new JobSchedule(
-            //    jobType: typeof(RamMetricJob),
-            //    cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+            services.AddSingleton<RamMetricJob>();
+            services.AddSingleton(new JobSchedule(
+                jobType: typeof(RamMetricJob),
+                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
             services.AddHostedService<QuartzHostedService>();
         }
 
