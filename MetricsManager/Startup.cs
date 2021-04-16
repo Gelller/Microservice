@@ -71,7 +71,7 @@ namespace MetricsManager
             services.AddSingleton<CpuMetricJob>();
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(CpuMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+                cronExpression: "0/5 * * * * ?"));
 
             services.AddSingleton<HddMetricJob>();
             services.AddSingleton(new JobSchedule(
@@ -101,8 +101,6 @@ namespace MetricsManager
             var connection = new SQLiteConnection(connectionString);
             connection.Open();
             services.AddSingleton(connection);
-
-
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IMigrationRunner migrationRunner)
