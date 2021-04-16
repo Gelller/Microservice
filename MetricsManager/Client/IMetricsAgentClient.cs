@@ -9,7 +9,7 @@ namespace MetricsManager.Client
 
         AllHddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request);
 
-        AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetrisApiRequest request);
+        AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetricsApiRequest request);
 
         AllCpuMetricsApiResponse GetAllCpuMetrics(GetAllCpuMetricsApiRequest request);
 

@@ -47,7 +47,7 @@ namespace MetricsManager.Controllers
             return Ok(response);
         }
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
             _logger.LogInformation($"starting new request to metrics agent");         
             var metrics = _metricsAgentClient.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest
@@ -92,6 +92,24 @@ namespace MetricsManager.Controllers
                 return Ok(percentileValue);
             }
             return Ok();
+        }
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllNetworkMetricsApiResponse()
+            {
+                Metrics = new List<NetworkMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<NetworkMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
 
     }

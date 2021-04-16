@@ -66,10 +66,6 @@ namespace MetricsManager.Controllers
                 FromTime = fromTime,
                 ToTime = toTime
             });
-            var response = new AllCpuMetricsApiResponse()
-            {
-                Metrics = new List<CpuMetricsDto>()
-            };
             if (metrics != null)
             {
                 double[] masValue = new double[metrics.Metrics.Count];

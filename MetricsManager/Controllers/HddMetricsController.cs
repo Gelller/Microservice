@@ -50,9 +50,9 @@ namespace MetricsManager.Controllers
             return Ok(response);
         }
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
-        {          
-             _logger.LogInformation($"starting new request to metrics agent");        
+        public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"starting new request to metrics agent");
             var metrics = _metricsAgentClient.GetAllHddMetrics(new GetAllHddMetricsApiRequest
             {
                 ClientBaseAddress = agentId,
@@ -96,6 +96,23 @@ namespace MetricsManager.Controllers
             }
             return Ok();
         }
-
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllHddMetricsApiResponse()
+            {
+                Metrics = new List<HddMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<HddMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
+        }
     }
 }

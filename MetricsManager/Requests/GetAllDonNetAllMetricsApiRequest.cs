@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace MetricsManager.Requests
 {
-    public class GetAllDotNetMetrisApiRequest
+    public class GetAllDotNetMetricsApiRequest
     {
         public int ClientBaseAddress { get; set; }
         public DateTimeOffset FromTime { get; set; }

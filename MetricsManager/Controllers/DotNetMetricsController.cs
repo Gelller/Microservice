@@ -48,10 +48,10 @@ namespace MetricsManager.Controllers
             return Ok(response);
         }
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
             _logger.LogInformation($"starting new request to metrics agent");      
-            var metrics = _metricsAgentClient.GetAllDotNetMetrics(new GetAllDotNetMetrisApiRequest
+            var metrics = _metricsAgentClient.GetAllDotNetMetrics(new GetAllDotNetMetricsApiRequest
 
             {
                 ClientBaseAddress = agentId,
@@ -75,7 +75,7 @@ namespace MetricsManager.Controllers
            [FromRoute] Percentile percentile)
         {
             _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
-            var metrics = _metricsAgentClient.GetAllDotNetMetrics(new GetAllDotNetMetrisApiRequest
+            var metrics = _metricsAgentClient.GetAllDotNetMetrics(new GetAllDotNetMetricsApiRequest
 
             {
                 ClientBaseAddress = agentId,
@@ -89,12 +89,30 @@ namespace MetricsManager.Controllers
                 {
                     masValue[i] = metrics.Metrics[i].Value;
                 }
+
                 var percentileCalculationMethod = new PercentileCalculationMethod();
                 var percentileValue = percentileCalculationMethod.PercentileCalculation(masValue, (double)percentile / 100);
                 return Ok(percentileValue);
             }
             return Ok();
-            
+        }
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllDotNetMetricsApiResponse()
+            {
+                Metrics = new List<DotNetMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<DotNetMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
 
     }

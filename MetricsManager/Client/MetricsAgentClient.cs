@@ -135,7 +135,7 @@ namespace MetricsManager.Client
                 return null;
             }
         }  
-        public AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetrisApiRequest request)
+        public AllDotNetMetricsApiResponse GetAllDotNetMetrics(GetAllDotNetMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.UtcDateTime.ToString("O");
             var toParameter = request.ToTime.UtcDateTime.ToString("O");

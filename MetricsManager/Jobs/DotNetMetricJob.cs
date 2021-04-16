@@ -29,13 +29,13 @@ namespace MetricsManager.Jobs
                 DateTimeOffset fromTime = DateTimeOffset.UtcNow.AddHours(-1);
                 DateTimeOffset toTime = DateTimeOffset.UtcNow;
                 int agentId = 1;
-                _repository.GetAllDotNetMetrics(new Requests.GetAllDotNetMetrisApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTime });
+                _repository.GetAllDotNetMetrics(new Requests.GetAllDotNetMetricsApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTime });
             }
             else
             {
                 DateTimeOffset toTime = DateTimeOffset.UtcNow;
                 int agentId = 1;
-                _repository.GetAllDotNetMetrics(new Requests.GetAllDotNetMetrisApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTimeFromtheTable.Time });
+                _repository.GetAllDotNetMetrics(new Requests.GetAllDotNetMetricsApiRequest { ClientBaseAddress = agentId, ToTime = toTime, FromTime = fromTimeFromtheTable.Time });
             }
             return Task.CompletedTask;
         }
