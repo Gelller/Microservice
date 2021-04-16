@@ -38,7 +38,12 @@ namespace MetricsAgent.Controllers
 
             return Ok();
         }
-
+        /// <summary>
+        /// Получает все метрики CPU
+        /// </summary>
+        /// <returns>Список метрик</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpGet("all")]
         public IActionResult GetAll()
         {
@@ -57,6 +62,20 @@ namespace MetricsAgent.Controllers
                 }
                 return Ok(response);
         }
+        /// <summary>
+        /// Получает метрики CPU на заданном диапазоне времени
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET /from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {

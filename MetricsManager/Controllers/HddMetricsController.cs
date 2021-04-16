@@ -49,6 +49,21 @@ namespace MetricsManager.Controllers
             }
             return Ok(response);
         }
+        /// <summary>
+        /// Получает метрики Hdd на заданном диапазоне времени с агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET agentid/1/from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="agentId">id агента</param>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
@@ -71,6 +86,22 @@ namespace MetricsManager.Controllers
             }
             return Ok(metrics);
         }
+        /// <summary>
+        /// Получает перцентиль с метрик Hdd на заданном диапазоне времени с агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET agentid/1/from/2000-10-1 01:01:01/to/2100-10-1 01:01:01/Percentile/P75
+        ///
+        /// </remarks>
+        /// <param name="agentId">id агента</param>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <param name="percentile">перцентиль</param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
           [FromRoute] Percentile percentile)
@@ -96,6 +127,12 @@ namespace MetricsManager.Controllers
             }
             return Ok();
         }
+        /// <summary>
+        /// Получает все метрики Hdd
+        /// </summary>
+        /// <returns>Список метрик</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {

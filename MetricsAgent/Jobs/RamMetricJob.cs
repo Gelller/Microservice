@@ -24,7 +24,7 @@ namespace MetricsAgent.Jobs
         {
             var ramUsageInPercents = Convert.ToInt32(_ramCounter.NextValue());
             DateTimeOffset time = DateTimeOffset.UtcNow;
-            _repository.Create(new Models.RamMetrics { Time = time, Value = ramUsageInPercents });
+            _repository.Create(new Models.RamMetrics {Time=time, Value = ramUsageInPercents });
             return Task.CompletedTask;
         }
     }

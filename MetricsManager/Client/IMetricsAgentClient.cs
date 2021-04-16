@@ -1,9 +1,10 @@
 ﻿using MetricsManager.Responses;
 using MetricsManager.Requests;
+using MetricManager;
 
 namespace MetricsManager.Client
 {
-    public interface IMetricsAgentClient
+    public partial interface IMetricsAgentClient
     {
         AllRamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request);
 

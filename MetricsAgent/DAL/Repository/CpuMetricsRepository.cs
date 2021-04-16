@@ -33,7 +33,7 @@ namespace MetricsAgent.DAL.Repository
             {
                 return connection.Query<CpuMetrics>("SELECT Id, Time, Value FROM cpumetrics").ToList();
             }      
-        }
+        }     
         public IList<CpuMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
             using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))

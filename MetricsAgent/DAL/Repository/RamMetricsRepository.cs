@@ -7,13 +7,17 @@ using Dapper;
 using System.Linq;
 using System.Data;
 using System.IO;
+using MetricsAgent.Controllers;
+using Microsoft.Extensions.Logging;
 
 namespace MetricsAgent.DAL.Repository
 {
     public class RamMetricsRepository : IRamMetricsRepository
     {
-        public RamMetricsRepository()
+        private readonly ILogger<RamMetricsController> _logger;
+        public RamMetricsRepository(ILogger<RamMetricsController> logger)
         {
+            _logger = logger;
             SqlMapper.AddTypeHandler(new DateTimeOffsetHandler());
         }
         public void Create(RamMetrics item)
@@ -30,16 +34,16 @@ namespace MetricsAgent.DAL.Repository
         }
         public IList<RamMetrics> GetAll()
         {
-            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
-            {
-                return connection.Query<RamMetrics>("SELECT Id, Time, Value FROM rammetrics").ToList();
-            }
+                using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
+                {
+                    return connection.Query<RamMetrics>("SELECT Id, Value, Time FROM rammetrics").ToList();
+                }      
         }
         public IList<RamMetrics> GetByTimeInterval(DateTimeOffset fromTime, DateTimeOffset toTime)
         {
             using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
             {
-                return connection.Query<RamMetrics>($"SELECT Id, Time, Value FROM rammetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
+                return connection.Query<RamMetrics>($"SELECT Id, Value, Time FROM rammetrics WHERE Time>={fromTime.ToUnixTimeSeconds()} AND Time<={toTime.ToUnixTimeSeconds()}").ToList();
             }
         }     
     }

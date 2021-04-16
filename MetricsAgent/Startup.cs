@@ -12,6 +12,10 @@ using FluentMigrator.Runner;
 using Quartz;
 using Quartz.Spi;
 using Quartz.Impl;
+using Microsoft.OpenApi.Models;
+using System;
+using System.Reflection;
+using System.IO;
 
 namespace MetricsAgent
 {
@@ -52,32 +56,61 @@ namespace MetricsAgent
             services.AddSingleton<IJobFactory, SingletonJobFactory>();
             services.AddSingleton<ISchedulerFactory, StdSchedulerFactory>();
             // добавляем нашу задачу
+            services.AddSingleton<RamMetricJob>();
             services.AddSingleton<CpuMetricJob>();
             services.AddSingleton<HddMetricJob>();
             services.AddSingleton<DotNetMetricJob>();
             services.AddSingleton<NetworkMetricJob>();
-            services.AddSingleton<RamMetricJob>();
+
+
+            services.AddSingleton(new JobSchedule(
+             jobType: typeof(RamMetricJob),
+             cronExpression: "0/7 * * * * ?")); // запускать каждые 5 секунд
 
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(CpuMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+                cronExpression: "0/7 * * * * ?")); // запускать каждые 5 секунд
 
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(HddMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+                cronExpression: "0/7 * * * * ?")); // запускать каждые 5 секунд
 
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(DotNetMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+                cronExpression: "0/7 * * * * ?")); // запускать каждые 5 секунд
 
             services.AddSingleton(new JobSchedule(
                 jobType: typeof(NetworkMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
+                cronExpression: "0/7 * * * * ?")); // запускать каждые 5 секунд
 
-            services.AddSingleton(new JobSchedule(
-                jobType: typeof(RamMetricJob),
-                cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
-            services.AddHostedService<QuartzHostedService>();  
+         
+            services.AddHostedService<QuartzHostedService>();
+            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "API сервиса агента сбора метрик",
+                    Description = "Тут можно поиграть с api нашего сервиса",
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Kadyrov",
+                        Email = string.Empty,
+                        Url = new Uri("https://kremlin.ru"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "можно указать под какой лицензией все опубликовано",
+                        Url = new Uri("https://example.com/license"),
+                    }
+                });
+                // Указываем файл из которого брать комментарии для Swagger UI
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
         }
 
         private void ConfigureSqlLiteConnection(IServiceCollection services)
@@ -107,6 +140,12 @@ namespace MetricsAgent
 
             // запускаем миграции
             migrationRunner.MigrateUp();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API сервиса агента сбора метрик");
+                c.RoutePrefix = string.Empty;
+            });
         }
     }
 }

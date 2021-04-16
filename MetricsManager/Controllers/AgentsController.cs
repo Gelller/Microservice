@@ -23,6 +23,20 @@ namespace MetricsManager.Controllers
         {
 
         }
+        /// <summary>
+        /// Зарегистрировать агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///    {
+        ///
+        /// "AgentAddress" : https://localhost:5001
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpPost("register")]
         public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
         {
@@ -36,6 +50,12 @@ namespace MetricsManager.Controllers
             }
             return Ok();
         }
+        /// <summary>
+        /// Получает список агентов
+        /// </summary>
+        /// <returns>список агентов</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpGet("сatalogRegisterAgent")]
         public IList<AgentInfo> СatalogRegisterAgent()
         {

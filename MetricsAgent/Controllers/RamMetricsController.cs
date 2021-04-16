@@ -17,6 +17,7 @@ namespace MetricsAgent.Controllers
     [ApiController]
     public class RamMetricsController : Controller
     {
+       // private ICpuMetricsRepository _repository;
         private readonly ILogger<RamMetricsController> _logger;
         private IRamMetricsRepository _repository;
         private readonly IMapper _mapper;
@@ -32,17 +33,26 @@ namespace MetricsAgent.Controllers
             _logger.LogInformation($"Метод Create {request}");
             _repository.Create(new RamMetrics
             {
-                Time = request.Time,
+               Time = request.Time,
                 Value = request.Value
             });
 
             return Ok();
         }
+        /// <summary>
+        /// Получает все метрики Ram
+        /// </summary>
+        /// <returns>Список метрик</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>
+
+
         [HttpGet("all")]
         public IActionResult GetAll()
         {
-            _logger.LogInformation($"Метод GetAll");
+           _logger.LogInformation($"Метод GetAll");
             IList<RamMetrics> metrics = _repository.GetAll();
+            // IList<RamMetrics> metrics = _repository.GetAll();
             var response = new AllRamMetricsResponse()
             {
                 Metrics = new List<RamMetricsDto>()
@@ -55,7 +65,22 @@ namespace MetricsAgent.Controllers
                 }
             }
             return Ok(response);
+          //  return Ok();
         }
+        /// <summary>
+        /// Получает метрики Ram на заданном диапазоне времени
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET /from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
         [HttpGet("from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {

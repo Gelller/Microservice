@@ -22,6 +22,9 @@ using Quartz;
 using Quartz.Spi;
 using Quartz.Impl;
 using MetricManager;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using System.IO;
 
 namespace MetricsManager
 {
@@ -60,7 +63,9 @@ namespace MetricsManager
                 ).AddLogging(lb => lb
                     .AddFluentMigratorConsole());
 
-            services.AddHttpClient<IMetricsAgentClient, MetricsAgentClient>()
+            services.AddHttpClient<IMetricsAgentClient,MetricsAgentClient>()
+          // services.AddHttpClient<IClient, Client1>()
+
         .AddTransientHttpErrorPolicy(p =>
             p.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(1000)));
 
@@ -93,12 +98,41 @@ namespace MetricsManager
                 jobType: typeof(RamMetricJob),
                 cronExpression: "0/5 * * * * ?")); // запускать каждые 5 секунд
             services.AddHostedService<QuartzHostedService>();
+            services.AddSwaggerGen();
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Version = "v1",
+                    Title = "API сервиса агента сбора метрик",
+                    Description = "“ут можно поиграть с api нашего сервиса",
+                    TermsOfService = new Uri("https://example.com/terms"),
+                    Contact = new OpenApiContact
+                    {
+                        Name = "Kadyrov",
+                        Email = string.Empty,
+                        Url = new Uri("https://kremlin.ru"),
+                    },
+                    License = new OpenApiLicense
+                    {
+                        Name = "можно указать под какой лицензией все опубликовано",
+                        Url = new Uri("https://example.com/license"),
+                    }
+                });
+                // ”казываем файл из которого брать комментарии дл€ Swagger UI
+                //var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                //var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                //c.IncludeXmlComments(xmlPath);
+                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
+
         }
 
         private void ConfigureSqlLiteConnection(IServiceCollection services)
         {
-            string connectionString = "Data Source=:memory:";
-            var connection = new SQLiteConnection(connectionString);
+            var connection = new SQLiteConnection(SQLConnected.ConnectionString);
             connection.Open();
             services.AddSingleton(connection);
         }
@@ -118,9 +152,13 @@ namespace MetricsManager
             {
                 endpoints.MapControllers();
             });
-
-            // запускаем миграции
             migrationRunner.MigrateUp();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "API сервиса агента сбора метрик");
+                c.RoutePrefix = string.Empty;
+            });
         }
     }
 }
