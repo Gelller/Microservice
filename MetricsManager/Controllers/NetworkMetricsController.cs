@@ -10,6 +10,8 @@ using MetricsManager.Requests;
 using MetricsManager.Models;
 using MetricsManager.DAL.Interfaces;
 using MetricsManager.Responses;
+using Dapper;
+using System.Linq;
 
 namespace MetricsManager.Controllers
 {
@@ -17,6 +19,7 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class NetworkMetricsController : Controller
     {
+        private UriAdress _uriAdress = new UriAdress();
         private INetworkMetricsRepository _repository;
         private IMetricsAgentClient _metricsAgentClient;
         private readonly IMapper _mapper;
@@ -64,10 +67,10 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"starting new request to metrics agent");         
+            _logger.LogInformation($"starting new request to metrics agent");       
             var metrics = _metricsAgentClient.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });
@@ -103,10 +106,10 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
         [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");           
             var metrics = _metricsAgentClient.GetAllNetworkMetrics(new GetAllNetworkMetricsApiRequest
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });

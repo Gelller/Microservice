@@ -19,100 +19,67 @@ namespace MetricsManager.Client
 {
     public class MetricsAgentClient : IMetricsAgentClient
     {
-        private ICpuMetricsRepository _repositoryCpu;
-        private IDotNetMetricsRepository _repositoryDotNet;
-        private IRamMetricsRepository _repositoryRam;
-        private IHddMetricsRepository _repositoryHdd;
-        private INetworkMetricsRepository _repositoryNetwork;
         private HttpClient _httpClient;
-        private readonly ILogger<HddMetricsController> _loggerHddMetrics;
-        private readonly ILogger<CpuMetricsController> _loggerCpuMetrics;
-  
-        public MetricsAgentClient(INetworkMetricsRepository repositoryNetwork, IHddMetricsRepository repositoryHdd, IRamMetricsRepository repositoryRam, IDotNetMetricsRepository repositoryDotNet, ICpuMetricsRepository repositoryCpu, ILogger<CpuMetricsController> loggerCpuMetrics, HttpClient httpClient, ILogger<HddMetricsController> logger)
-        {
-            _repositoryNetwork = repositoryNetwork;
-            _repositoryHdd = repositoryHdd;
-            _repositoryRam = repositoryRam;
-            _repositoryDotNet = repositoryDotNet;
-            _repositoryCpu = repositoryCpu;
-            _loggerCpuMetrics = loggerCpuMetrics;
-            _httpClient = httpClient;
-            _loggerHddMetrics = logger;
-        }
+        private readonly ILogger<CpuMetricsController> _loggerCpu;
+        private readonly ILogger<HddMetricsController> _loggerHdd;
+        private readonly ILogger<DotNetMetricsController> _loggerDotNet;
+        private readonly ILogger<NetworkMetricsController> _loggerNetwork;
+        private readonly ILogger<RamMetricsController> _loggerRam;
 
-        private List<AgentInfo> GetUri(int number)
+        public MetricsAgentClient(ILogger<CpuMetricsController> loggerCpu, ILogger<HddMetricsController> loggerHdd, ILogger<DotNetMetricsController> loggerDotNet, ILogger<NetworkMetricsController> loggerNetwork, ILogger<RamMetricsController> loggerRam, HttpClient httpClient)
         {
-            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
-            {
-                return connection.Query<AgentInfo>($"SELECT AgentAddress FROM agent WHERE AgentId={number}").ToList();
-            }
+            _loggerCpu = loggerCpu;
+            _loggerHdd = loggerHdd;
+            _loggerDotNet = loggerDotNet;
+            _loggerNetwork = loggerNetwork;
+            _loggerRam = loggerRam;
+            _httpClient = httpClient;
         }
         public AllHddMetricsApiResponse GetAllHddMetrics(GetAllHddMetricsApiRequest request)
         {
-            var fromParameter = request.FromTime.UtcDateTime.ToString("O");
-            var toParameter = request.ToTime.UtcDateTime.ToString("O");
-            List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
-           var uri = new Uri(uriAdress[0].AgentAddress);
+           var fromParameter = request.FromTime.UtcDateTime.ToString("O");
+           var toParameter = request.ToTime.UtcDateTime.ToString("O");
+           var uri =request.ClientBaseAddress;
            var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/hdd/from/{fromParameter}/to/{toParameter}");
             try
             {
                     HttpResponseMessage response = _httpClient.SendAsync(httpRequest).Result;
-
                     using var responseStream = response.Content.ReadAsStreamAsync().Result;
                     using var streamReader = new StreamReader(responseStream);
                     var content = streamReader.ReadToEnd();
-
-                     foreach (var item in JsonConvert.DeserializeObject<AllHddMetricsApiResponse>(content).Metrics)
-                    _repositoryHdd.Create(new HddMetrics
-                    {
-                        AgentId = request.ClientBaseAddress,
-                        Time = item.Time,
-                        Value = item.Value
-                    });
-                return JsonConvert.DeserializeObject<AllHddMetricsApiResponse>(content);
+                    return JsonConvert.DeserializeObject<AllHddMetricsApiResponse>(content);
             }
             catch (Exception ex)
             {
-                    _loggerHddMetrics.LogError(ex.Message);
+                    _loggerHdd.LogError(ex.Message);
                     return null;
-            }
-            
+            }      
         }
         public AllRamMetricsApiResponse GetAllRamMetrics(GetAllRamMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.UtcDateTime.ToString("O");
             var toParameter = request.ToTime.UtcDateTime.ToString("O");
-            List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
-            var uri = new Uri(uriAdress[0].AgentAddress);
+            var uri = request.ClientBaseAddress;
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/ram/from/{fromParameter}/to/{toParameter}");
             try
             {
                 HttpResponseMessage response = _httpClient.SendAsync(httpRequest).Result;
-
                 using var responseStream = response.Content.ReadAsStreamAsync().Result;
                 using var streamReader = new StreamReader(responseStream);
                 var content = streamReader.ReadToEnd();
-                foreach (var item in JsonConvert.DeserializeObject<AllRamMetricsApiResponse>(content).Metrics)
-                    _repositoryRam.Create(new RamMetrics
-                    {
-                        AgentId = request.ClientBaseAddress,
-                        Time = item.Time,
-                        Value = item.Value
-                    });
                 return JsonConvert.DeserializeObject<AllRamMetricsApiResponse>(content);
             }
             catch (Exception ex)
             {
-                _loggerCpuMetrics.LogError(ex.Message);
+                _loggerRam.LogError(ex.Message);
                 return null;
             }
         }
         public AllCpuMetricsApiResponse GetAllCpuMetrics(GetAllCpuMetricsApiRequest request)
         {
             var fromParameter = request.FromTime.UtcDateTime.ToString("O");
-            var toParameter = request.ToTime.UtcDateTime.ToString("O"); 
-            List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
-            var uri = new Uri(uriAdress[0].AgentAddress);
+            var toParameter = request.ToTime.UtcDateTime.ToString("O");
+            var uri = request.ClientBaseAddress;
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/cpu/from/{fromParameter}/to/{toParameter}");
             try
             {
@@ -120,18 +87,11 @@ namespace MetricsManager.Client
                 using var responseStream = response.Content.ReadAsStreamAsync().Result;
                 using var streamReader = new StreamReader(responseStream);
                 var content = streamReader.ReadToEnd();
-                foreach (var item in JsonConvert.DeserializeObject<AllCpuMetricsApiResponse>(content).Metrics)
-                    _repositoryCpu.Create(new CpuMetrics
-                    {
-                        AgentId = request.ClientBaseAddress,
-                        Time = item.Time,
-                        Value = item.Value
-                    });
                 return JsonConvert.DeserializeObject<AllCpuMetricsApiResponse>(content);
             }
             catch (Exception ex)
             {
-                _loggerCpuMetrics.LogError(ex.Message);
+                _loggerCpu.LogError(ex.Message);
                 return null;
             }
         }  
@@ -139,8 +99,7 @@ namespace MetricsManager.Client
         {
             var fromParameter = request.FromTime.UtcDateTime.ToString("O");
             var toParameter = request.ToTime.UtcDateTime.ToString("O");
-            List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
-            var uri = new Uri(uriAdress[0].AgentAddress);
+            var uri =request.ClientBaseAddress;
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/dotnet/errors-count/from/{fromParameter}/to/{toParameter}");
             try
             {
@@ -148,18 +107,11 @@ namespace MetricsManager.Client
                 using var responseStream = response.Content.ReadAsStreamAsync().Result;
                 using var streamReader = new StreamReader(responseStream);
                 var content = streamReader.ReadToEnd();
-                foreach (var item in JsonConvert.DeserializeObject<AllDotNetMetricsApiResponse>(content).Metrics)
-                    _repositoryDotNet.Create(new DotNetMetrics
-                    {
-                        AgentId = request.ClientBaseAddress,
-                        Time = item.Time,
-                        Value = item.Value
-                    });
                 return JsonConvert.DeserializeObject<AllDotNetMetricsApiResponse>(content);
             }
             catch (Exception ex)
             {
-                _loggerHddMetrics.LogError(ex.Message);
+                _loggerNetwork.LogError(ex.Message);
                 return null;
             }
         }
@@ -168,8 +120,7 @@ namespace MetricsManager.Client
         {
             var fromParameter = request.FromTime.UtcDateTime.ToString("O");
             var toParameter = request.ToTime.UtcDateTime.ToString("O");
-            List<AgentInfo> uriAdress = GetUri(request.ClientBaseAddress);
-            var uri = new Uri(uriAdress[0].AgentAddress);
+            var uri = request.ClientBaseAddress;
             var httpRequest = new HttpRequestMessage(HttpMethod.Get, $"{uri}api/metrics/network/from/{fromParameter}/to/{toParameter}");
             try
             {
@@ -177,18 +128,11 @@ namespace MetricsManager.Client
                 using var responseStream = response.Content.ReadAsStreamAsync().Result;
                 using var streamReader = new StreamReader(responseStream);
                 var content = streamReader.ReadToEnd();
-                foreach (var item in JsonConvert.DeserializeObject<AllNetworkMetricsApiResponse>(content).Metrics)
-                    _repositoryNetwork.Create(new NetworkMetrics
-                    {
-                        AgentId = request.ClientBaseAddress,
-                        Time = item.Time,
-                        Value = item.Value
-                    });
                 return JsonConvert.DeserializeObject<AllNetworkMetricsApiResponse>(content);
             }
             catch (Exception ex)
             {
-                _loggerHddMetrics.LogError(ex.Message);
+                _loggerDotNet.LogError(ex.Message);
                 return null;
             }
         }

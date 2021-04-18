@@ -7,7 +7,7 @@ namespace MetricsManager.Requests
 {
     public class GetAllNetworkMetricsApiRequest
     {
-        public int ClientBaseAddress { get; set; }
+        public Uri ClientBaseAddress { get; set; }
         public DateTimeOffset FromTime { get; set; }
         public DateTimeOffset ToTime { get; set; }
     }

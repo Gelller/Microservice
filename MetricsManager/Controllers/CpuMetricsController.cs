@@ -10,6 +10,8 @@ using MetricsManager.Requests;
 using AutoMapper;
 using MetricsManager.DAL.Interfaces;
 using MetricsManager.Models;
+using Dapper;
+using System.Linq;
 
 namespace MetricsManager.Controllers
 {
@@ -17,13 +19,14 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
+        private UriAdress _uriAdress=new UriAdress();
         private ICpuMetricsRepository _repository;
         private readonly ILogger<CpuMetricsController> _logger;
         private IMetricsAgentClient _metricsAgentClient;
         private readonly IMapper _mapper;
         public CpuMetricsController(ICpuMetricsRepository repository, IMapper mapper, ILogger<CpuMetricsController> logger, IMetricsAgentClient metricsAgentClient)
         {
-            _repository= repository;
+            _repository = repository;
             _mapper = mapper;
             _metricsAgentClient = metricsAgentClient;
             _logger = logger;
@@ -46,11 +49,10 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"starting new request to metrics agent");    
+            _logger.LogInformation($"starting new request to metrics agent");      
             var metrics = _metricsAgentClient.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
-
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });
@@ -87,11 +89,11 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");           
             var metrics = _metricsAgentClient.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
 
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });

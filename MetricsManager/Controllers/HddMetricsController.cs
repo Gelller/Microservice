@@ -12,6 +12,8 @@ using System.Text.Json;
 using MetricsManager.DAL.Interfaces;
 using AutoMapper;
 using MetricsManager.Models;
+using Dapper;
+using System.Linq;
 
 namespace MetricsManager.Controllers
 {
@@ -19,6 +21,7 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class HddMetricsController : Controller
     {
+        private UriAdress _uriAdress = new UriAdress();
         private IHddMetricsRepository _repository;
         private IMetricsAgentClient _metricsAgentClient;
         private readonly ILogger<HddMetricsController> _logger;
@@ -67,10 +70,10 @@ namespace MetricsManager.Controllers
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
         public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"starting new request to metrics agent");
+            _logger.LogInformation($"starting new request to metrics agent");           
             var metrics = _metricsAgentClient.GetAllHddMetrics(new GetAllHddMetricsApiRequest
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });
@@ -106,10 +109,10 @@ namespace MetricsManager.Controllers
         public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
           [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");       
             var metrics = _metricsAgentClient.GetAllHddMetrics(new GetAllHddMetricsApiRequest
             {
-                ClientBaseAddress = agentId,
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
                 FromTime = fromTime,
                 ToTime = toTime
             });
