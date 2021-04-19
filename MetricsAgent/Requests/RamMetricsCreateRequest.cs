@@ -7,6 +7,7 @@ namespace MetricsAgent.Requests
 {
     public class RamMetricsCreateRequest
     {
+        public DateTimeOffset Time { get; set; }
         public int Value { get; set; }
     }
 }

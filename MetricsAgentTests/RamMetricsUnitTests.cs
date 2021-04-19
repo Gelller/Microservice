@@ -6,6 +6,8 @@ using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 namespace MetricsAgentTests
 {
@@ -14,11 +16,13 @@ namespace MetricsAgentTests
         private Mock<ILogger<RamMetricsController>> _logger;
         private RamMetricsController _controller;
         private Mock<IRamMetricsRepository> _mock;
+        private Mock<IMapper> _imapper;
         public RamMetricsUnitTests()
         {
             _logger = new Mock<ILogger<RamMetricsController>>();
             _mock = new Mock<IRamMetricsRepository>();
-            _controller = new RamMetricsController(_mock.Object,_logger.Object);
+            _imapper = new Mock<IMapper>();
+            _controller = new RamMetricsController(_mock.Object,_logger.Object, _imapper.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
@@ -35,10 +39,9 @@ namespace MetricsAgentTests
             _mock.Verify(repository => repository.Create(It.IsAny<RamMetrics>()));
         }
         [Fact]
-        public void GetMetricsFromAgent_ReturnsOk()
+        public void GetAll_ReturnsOk()
         {
-            var agentId = 1;
-            var result = _controller.GetMetricsFromAgent();
+            var result = _controller.GetAll();
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }

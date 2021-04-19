@@ -8,6 +8,8 @@ using MetricsAgent.Models;
 using MetricsAgent.Requests;
 using MetricsAgent.Responses;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 namespace MetricsAgent.Controllers
 {
@@ -17,10 +19,12 @@ namespace MetricsAgent.Controllers
     {
         private readonly ILogger<NetworkMetricsController> _logger;
         private INetworkMetricsRepository _repository;
-        public NetworkMetricsController(INetworkMetricsRepository repository, ILogger<NetworkMetricsController> logger)
+        private readonly IMapper _mapper;
+        public NetworkMetricsController(INetworkMetricsRepository repository, ILogger<NetworkMetricsController> logger, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
+            _mapper = mapper;
         }
         [HttpPost("create")]
         public IActionResult Create([FromBody] NetworkMetricsCreateRequest request)
@@ -34,40 +38,60 @@ namespace MetricsAgent.Controllers
 
             return Ok();
         }
-
+        /// <summary>
+        /// Получает все метрики Network
+        /// </summary>
+        /// <returns>Список метрик</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>
         [HttpGet("all")]
         public IActionResult GetAll()
         {
             _logger.LogInformation($"Метод GetAll");
-            var metrics = _repository.GetAll();
+            IList<NetworkMetrics> metrics = _repository.GetAll();
             var response = new AllNetworkMetricsResponse()
             {
                 Metrics = new List<NetworkMetricsDto>()
-            };
-
-            foreach (var metric in metrics)
-            {
-                response.Metrics.Add(new NetworkMetricsDto { Time = metric.Time, Value = metric.Value, Id = metric.Id });
-            }
-
-            return Ok(response);
-        }
-        [HttpGet("from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
-        {
-            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
-            var response = new AllCpuMetricsResponse()
-            {
-                Metrics = new List<CpuMetricsDto>()
             };
             if (metrics != null)
             {
                 foreach (var metric in metrics)
                 {
-                    response.Metrics.Add(new CpuMetricsDto { Time = metric.Time, Value = metric.Value, Id = metric.Id });
+                    response.Metrics.Add(_mapper.Map<NetworkMetricsDto>(metric));
                 }
             }
+            return Ok(response);
+        }
+        /// <summary>
+        /// Получает метрики Network на заданном диапазоне времени
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET /from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
+        {
             _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllNetworkMetricsResponse()
+            {
+                Metrics = new List<NetworkMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<NetworkMetricsDto>(metric));
+                }
+            }
             return Ok(response);
         }
     }

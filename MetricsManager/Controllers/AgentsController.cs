@@ -2,7 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using MetricsManager.Responses;
+using System.Text.Json;
+using MetricsManager.Client;
+using MetricsManager.Requests;
+using System.Data.SQLite;
+using Dapper;
+using MetricsManager.Models;
+using MetricsManager.DAL.Repository;
 
 namespace MetricsManager.Controllers
 {
@@ -10,44 +19,51 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class AgentsController : ControllerBase
     {
-        private NumberOfAgentsRegistered _numberOfAgentsRegistered;
-        public AgentsController(NumberOfAgentsRegistered registered)
+        public AgentsController()
         {
-            this._numberOfAgentsRegistered = registered;
+
         }
+        /// <summary>
+        /// Зарегистрировать агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///    {
+        ///
+        /// "AgentAddress" : https://localhost:5001
+        ///     }
+        ///
+        /// </remarks>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpPost("register")]
         public IActionResult RegisterAgent([FromBody] AgentInfo agentInfo)
         {
-            _numberOfAgentsRegistered.Values.Add(agentInfo);
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
+            {
+                connection.Execute(@"INSERT INTO agent(AgentAddress) VALUES(@AgentAddress)",
+                new
+                {
+                    AgentAddress = agentInfo.AgentAddress.ToString()
+                });
+            }
             return Ok();
         }
-        [HttpPut("enable/{agentId}")]
-        public IActionResult EnableAgentById([FromRoute] int agentId)
-        {
-            return Ok();
-        }
-        [HttpPut("disable/{agentId}")]
-        public IActionResult DisableAgentById([FromRoute] int agentId)
-        {
-            return Ok();
-        }
+        /// <summary>
+        /// Получает список агентов
+        /// </summary>
+        /// <returns>список агентов</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
         [HttpGet("сatalogRegisterAgent")]
-        public IActionResult СatalogRegisterAgent()
+        public IList<AgentInfo> СatalogRegisterAgent()
         {
-            return Ok(_numberOfAgentsRegistered);
+            using (var connection = new SQLiteConnection(SQLConnected.ConnectionString))
+            {
+                return connection.Query<AgentInfo>("SELECT AgentId, AgentAddress FROM agent").ToList();
+            }
         }
     }
-    public class NumberOfAgentsRegistered
-    {
-        public List<AgentInfo> Values { get; set; }
-        public NumberOfAgentsRegistered()
-        {
-            Values = new List<AgentInfo>();
-        }
-    }
-    public class AgentInfo
-    {
-        public int AgentId { get; set; }
-        public Uri AgentAddress { get; set; }
-    }
+   
 }

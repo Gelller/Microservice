@@ -4,6 +4,14 @@ using System.Collections.Generic;
 using NLog.Web;
 using Microsoft.Extensions.Logging;
 using System.Data.SQLite;
+using MetricsManager.Responses;
+using MetricsManager.Client;
+using MetricsManager.Requests;
+using AutoMapper;
+using MetricsManager.DAL.Interfaces;
+using MetricsManager.Models;
+using Dapper;
+using System.Linq;
 
 namespace MetricsManager.Controllers
 {
@@ -11,135 +19,153 @@ namespace MetricsManager.Controllers
     [ApiController]
     public class CpuMetricsController : ControllerBase
     {
+        private UriAdress _uriAdress=new UriAdress();
+        private ICpuMetricsRepository _repository;
         private readonly ILogger<CpuMetricsController> _logger;
-        public CpuMetricsController(ILogger<CpuMetricsController> logger)
+        private IMetricsAgentClient _metricsAgentClient;
+        private readonly IMapper _mapper;
+        public CpuMetricsController(ICpuMetricsRepository repository, IMapper mapper, ILogger<CpuMetricsController> logger, IMetricsAgentClient metricsAgentClient)
         {
+            _repository = repository;
+            _mapper = mapper;
+            _metricsAgentClient = metricsAgentClient;
             _logger = logger;
         }
-        [HttpGet("sql-test")]
-        public IActionResult TryToSqlLite()
-        {
-            _logger.LogInformation($"Метод TryToSqlLitet");
-            string cs = "Data Source=:memory:";
-            string stm = "SELECT SQLITE_VERSION()";
-
-            using (var con = new SQLiteConnection(cs))
-            {
-                con.Open();
-
-                using var cmd = new SQLiteCommand(stm, con);
-                string version = cmd.ExecuteScalar().ToString();
-
-                return Ok(version);
-            }
-        }
-
+        /// <summary>
+        /// Получает метрики CPU на заданном диапазоне времени с агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET agentid/1/from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="agentId">id агента</param>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
+        public IActionResult GetMetricsAgentFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            _logger.LogInformation($"Метод GetMetricsFromAgent agentId {agentId} fromTime {fromTime} toTime {toTime}");
-            return Ok();
-        }
+            _logger.LogInformation($"starting new request to metrics agent");      
+            var metrics = _metricsAgentClient.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
+            {
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
+                FromTime = fromTime,
+                ToTime = toTime
+            });
 
+            if (metrics!= null)
+            {
+                foreach (var item in metrics.Metrics)
+                    _repository.Create(new CpuMetrics
+                    {
+                        AgentId = agentId,
+                        Time = item.Time,
+                        Value = item.Value
+                    }); ;
+            }
+            return Ok(metrics);
+        }
+        /// <summary>
+        /// Получает перцентиль с метрик CPU на заданном диапазоне времени с агента
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET agentid/1/from/2000-10-1 01:01:01/to/2100-10-1 01:01:01/Percentile/P75
+        ///
+        /// </remarks>
+        /// <param name="agentId">id агента</param>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <param name="percentile">перцентиль</param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response> 
         [HttpGet("agent/{agentId}/from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
-        public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent agentId {agentId} fromTime {fromTime} toTime {toTime}");
-            return Ok();
-        }
-
-        [HttpGet("cluster/from/{fromTime}/to/{toTime}")]
-        public IActionResult GetMetricsFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime)
-        {
-            _logger.LogInformation($"Метод GetMetricsFromAllCluster fromTime {fromTime} toTime {toTime}");
-            return Ok();
-        }
-
-        [HttpGet("cluster/from/{fromTime}/to/{toTime}/percentiles/{percentile}")]
-        public IActionResult GetMetricsByPercentileFromAllCluster([FromRoute] TimeSpan fromTime, [FromRoute] TimeSpan toTime,
+        public IActionResult GetMetricsByPercentileFromAgent([FromRoute] int agentId, [FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime,
             [FromRoute] Percentile percentile)
         {
-            _logger.LogInformation($"Метод GetMetricsByPercentileFromAllCluster fromTime {fromTime} toTime {toTime}");
+            _logger.LogInformation($"Метод GetMetricsByPercentileFromAgent fromTime {fromTime} toTime {toTime}");           
+            var metrics = _metricsAgentClient.GetAllCpuMetrics(new GetAllCpuMetricsApiRequest
+
+            {
+                ClientBaseAddress = _uriAdress.GetUri(agentId),
+                FromTime = fromTime,
+                ToTime = toTime
+            });
+            if (metrics != null)
+            {
+                double[] masValue = new double[metrics.Metrics.Count];
+                for (int i = 0; i < masValue.Length; i++)
+                {
+                    masValue[i] = metrics.Metrics[i].Value;
+                }
+
+                var percentileCalculationMethod = new PercentileCalculationMethod();
+                var percentileValue = percentileCalculationMethod.PercentileCalculation(masValue, (double)percentile / 100);
+                return Ok(percentileValue);
+            }
             return Ok();
         }
-        [HttpGet("sql-read-write-test")]
-        public IActionResult TryToInsertAndRead()
+        /// <summary>
+        /// Получает все метрики CPU
+        /// </summary>
+        /// <returns>Список метрик</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
+        [HttpGet("all")]
+        public IActionResult GetAll()
         {
-            _logger.LogInformation($"Метод TryToInsertAndRead agentId");
-            // Создаем строку подключения в виде базы данных в оперативной памяти
-            string connectionString = "Data Source=:memory:";
-
-            // создаем соединение с базой данных
-            using (var connection = new SQLiteConnection(connectionString))
+            _logger.LogInformation($"Метод GetAll");
+            IList<CpuMetrics> metrics = _repository.GetAll();
+            var response = new AllCpuMetricsApiResponse()
             {
-                // открываем соединение
-                connection.Open();
-
-                // создаем объект через который будут выполняться команды к базе данных
-                using (var command = new SQLiteCommand(connection))
+                Metrics = new List<CpuMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
                 {
-                    // задаем новый текст команды для выполнения
-                    // удаляем таблицу с метриками если она существует в базе данных
-                    command.CommandText = "DROP TABLE IF EXISTS cpumetrics";
-                    // отправляем запрос в базу данных
-                    command.ExecuteNonQuery();
-
-                    // создаем таблицу с метриками
-                    command.CommandText = @"CREATE TABLE cpumetrics(id INTEGER PRIMARY KEY,
-                    value INT, time INT)";
-                    command.ExecuteNonQuery();
-
-                    // создаем запрос на вставку данных
-                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(10,1)";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(50,2)";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(75,4)";
-                    command.ExecuteNonQuery();
-                    command.CommandText = "INSERT INTO cpumetrics(value, time) VALUES(90,5)";
-                    command.ExecuteNonQuery();
-
-                    // создаем строку для выборки данных из базы
-                    // LIMIT 3 обозначает, что мы достанем только 3 записи
-                    string readQuery = "SELECT * FROM cpumetrics LIMIT 3";
-
-                    // создаем массив, в который запишем объекты с данными из базы данных
-                    var returnArray = new CpuMetricDto[3];
-                    // изменяем текст команды на наш запрос чтения
-                    command.CommandText = readQuery;
-
-                    // создаем читалку из базы данных
-                    using (SQLiteDataReader reader = command.ExecuteReader())
-                    {
-                        // счетчик для того, чтобы записать объект в правильное место в массиве
-                        var counter = 0;
-                        // цикл будет выполняться до тех пор, пока есть что читать из базы данных
-                        while (reader.Read())
-                        {
-                            // создаем объект и записываем его в массив
-                            returnArray[counter] = new CpuMetricDto
-                            {
-                                Id = reader.GetInt32(0), // читаем данные полученные из базы данных
-                                Value = reader.GetInt32(0), // преобразуя к целочисленному типу
-                                Time = reader.GetInt32(0)
-                            };
-                            // увеличиваем значение счетчика
-                            counter++;
-                        }
-                    }
-                    // оборачиваем массив с данными в объект ответа и возвращаем пользователю 
-                    return Ok(returnArray);
+                    response.Metrics.Add(_mapper.Map<CpuMetricsDto>(metric));
                 }
             }
+            return Ok(response);
         }
-
-        public class CpuMetricDto
+        /// <summary>
+        /// Получает метрики CPU на заданном диапазоне времени
+        /// </summary>
+        /// <remarks>
+        /// Пример запроса:
+        ///
+        ///     GET /from/2000-10-1 01:01:01/to/2100-10-1 01:01:01
+        ///
+        /// </remarks>
+        /// <param name="fromTime">начальная метрка времени</param>
+        /// <param name="toTime">конечная метрка времени </param>
+        /// <returns>Список метрик, которые были сохранены в заданном диапазоне времени</returns>
+        /// <response code="201">Если все хорошо</response>
+        /// <response code="400">если передали не правильные параетры</response>  
+        [HttpGet("from/{fromTime}/to/{toTime}")]
+        public IActionResult GetMetricsFromAgent([FromRoute] DateTimeOffset fromTime, [FromRoute] DateTimeOffset toTime)
         {
-            public int Id { get; set; }
-
-            public int Value { get; set; }
-
-            public int Time { get; set; }
+            _logger.LogInformation($"Метод GetMetricsFromAgent fromTime {fromTime.DateTime} toTime {toTime.DateTime}");
+            var metrics = _repository.GetByTimeInterval(fromTime, toTime);
+            var response = new AllCpuMetricsApiResponse()
+            {
+                Metrics = new List<CpuMetricsDto>()
+            };
+            if (metrics != null)
+            {
+                foreach (var metric in metrics)
+                {
+                    response.Metrics.Add(_mapper.Map<CpuMetricsDto>(metric));
+                }
+            }
+            return Ok(response);
         }
     }
 }

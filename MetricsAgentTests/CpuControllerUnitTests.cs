@@ -6,6 +6,8 @@ using System;
 using Xunit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using MetricsAgent.DAL.Interfaces;
+using AutoMapper;
 
 namespace MetricsAgentTests
 {
@@ -14,12 +16,14 @@ namespace MetricsAgentTests
         private Mock<ILogger<CpuMetricsController>> _logger;
         private CpuMetricsController _controller;
         private Mock<ICpuMetricsRepository> _mock;
+        private Mock<IMapper> _imapper;
 
         public CpuMetricsControllerUnitTests()
         {
             _logger = new Mock<ILogger<CpuMetricsController>>();
             _mock = new Mock<ICpuMetricsRepository>();
-            _controller = new CpuMetricsController(_mock.Object,_logger.Object);
+            _imapper = new Mock<IMapper>();
+            _controller = new CpuMetricsController(_mock.Object,_logger.Object,_imapper.Object);
         }
         [Fact]
         public void Create_ShouldCall_Create_From_Repository()
@@ -38,19 +42,17 @@ namespace MetricsAgentTests
         }
 
         [Fact]
+        public void GetAll_ReturnsOk()
+        {
+            var result = _controller.GetAll();
+            _ = Assert.IsAssignableFrom<IActionResult>(result);
+        }
+        [Fact]
         public void GetMetricsFromAgent_ReturnsOk()
         {
             var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
             var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
             var result = _controller.GetMetricsFromAgent(fromTime, toTime);
-            _ = Assert.IsAssignableFrom<IActionResult>(result);
-        }
-        [Fact]
-        public void GetMetricsByPercentileFromAgent_ReturnsOk()
-        {
-            var fromTime = DateTimeOffset.FromUnixTimeSeconds(0);
-            var toTime = DateTimeOffset.FromUnixTimeSeconds(100);
-            var result = _controller.GetMetricsByPercentileFromAgent(fromTime, toTime);
             _ = Assert.IsAssignableFrom<IActionResult>(result);
         }
     }
