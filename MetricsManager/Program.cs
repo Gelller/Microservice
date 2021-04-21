@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using NLog.Web;
+using System.IO;
 
 namespace MetricsManager
 {
@@ -12,6 +13,14 @@ namespace MetricsManager
         public static void Main(string[] args)
         {
             var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            var host = new WebHostBuilder()
+                .UseKestrel()
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseUrls("https://localhost:5004", "https://localhost:5005")
+                .UseIISIntegration()
+                .UseStartup<Startup>()
+                .Build();
+            host.Run();
             try
             {
                 logger.Debug("init main");

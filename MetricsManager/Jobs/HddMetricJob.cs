@@ -43,7 +43,8 @@ namespace MetricsManager.Jobs
                     DateTimeOffset toTime = DateTimeOffset.UtcNow;
                     hddMetrics = _metricsAgent.GetAllHddMetrics(new Requests.GetAllHddMetricsApiRequest { ClientBaseAddress = new Uri(adressAgent.AgentAddress), ToTime = toTime, FromTime = fromTimeFromTable });
                 }
-                foreach (var item in hddMetrics.Metrics)
+                if (hddMetrics != null)
+                    foreach (var item in hddMetrics.Metrics)
                     _repository.Create(new HddMetrics
                     {
                         AgentId = adressAgent.AgentId,
