@@ -43,7 +43,8 @@ namespace MetricsManager.Jobs
                     DateTimeOffset toTime = DateTimeOffset.UtcNow;
                     networkMetrics = _metricsAgent.GetAllNetworkMetrics(new Requests.GetAllNetworkMetricsApiRequest { ClientBaseAddress = new Uri(adressAgent.AgentAddress), ToTime = toTime, FromTime = fromTimeFromTable });
                 }
-                foreach (var item in networkMetrics.Metrics)
+                if (networkMetrics != null)
+                    foreach (var item in networkMetrics.Metrics)
                     _repository.Create(new NetworkMetrics
                     {
                         AgentId = adressAgent.AgentId,

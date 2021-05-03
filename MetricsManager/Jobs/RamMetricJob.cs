@@ -43,7 +43,8 @@ namespace MetricsManager.Jobs
                     DateTimeOffset toTime = DateTimeOffset.UtcNow;
                     ramMetrics = _metricsAgent.GetAllRamMetrics(new Requests.GetAllRamMetricsApiRequest { ClientBaseAddress = new Uri(adressAgent.AgentAddress), ToTime = toTime, FromTime = fromTimeFromTable });
                 }
-                foreach (var item in ramMetrics.Metrics)
+                if (ramMetrics != null)
+                    foreach (var item in ramMetrics.Metrics)
                     _repository.Create(new RamMetrics
                     {
                         AgentId = adressAgent.AgentId,

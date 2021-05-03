@@ -43,6 +43,7 @@ namespace MetricsManager.Jobs
                     DateTimeOffset toTime = DateTimeOffset.UtcNow;
                     cpuMetrics = _metricsAgent.GetAllCpuMetrics(new Requests.GetAllCpuMetricsApiRequest { ClientBaseAddress = new Uri(adressAgent.AgentAddress), ToTime = toTime, FromTime = fromTimeFromTable });
                 }
+                if(cpuMetrics!=null)
                 foreach (var item in cpuMetrics.Metrics)
                     _repository.Create(new CpuMetrics
                     {
